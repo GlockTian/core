@@ -36,12 +36,18 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
           hostPort : var.service_config.host_port
         }
       ]
-      secrets = [
+      secrets = flatten([
         for param in aws_ssm_parameter.parameters : {
           name      = param.tags.name
           valueFrom = param.arn
         }
-      ]
+        ],
+        [
+          for param in aws_ssm_parameter.rds : {
+            name      = param.tags.name
+            valueFrom = param.arn
+          }
+      ])
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -154,25 +160,7 @@ resource "aws_route53_record" "record" {
   records = [var.service_config.alb_dns_name]
 }
 
-resource "random_password" "password" {
-  length           = 16
-  special          = true
-  override_special = "!$%&*?"
-}
-
-resource "aws_rds_cluster" "default" {
-  count                   = var.create_rds_cluster ? 1 : 0
-  cluster_identifier      = "${var.service_config.name}-${var.env}"
-  engine                  = "aurora-postgresql"
-  availability_zones      = data.aws_availability_zones.current.names.*
-  db_subnet_group_name    = data.aws_db_subnet_group.current.id
-  database_name           = var.env
-  master_username         = "root"
-  master_password         = random_password.password
-  backup_retention_period = 5
-  preferred_backup_window = "07:00-09:00"
-}
-
-resource "postgresql_role" "api" {
-
+module "rds" {
+  count = var.create_rds_cluster ? 1 : 0
+  source = "../aurora"
 }
