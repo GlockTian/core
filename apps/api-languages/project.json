@@ -34,12 +34,6 @@
         }
       }
     },
-    "seed": {
-      "executor": "@nrwl/workspace:run-commands",
-      "options": {
-        "command": "npx ts-node apps/api-languages/db/seed.ts"
-      }
-    },
     "serve-nowatch": {
       "executor": "@nrwl/node:execute",
       "options": {
@@ -93,6 +87,31 @@
             "command": "DOPPLER_TOKEN=$DOPPLER_API_LANGUAGES_TOKEN doppler secrets download --no-file --format=env-no-quotes --project api-languages > apps/api-languages/.env"
           }
         ]
+      }
+    },
+    "prisma-generate": {
+      "executor": "@nx-tools/nx-prisma:generate",
+      "options": {
+        "schema": "apps/api-languages/prisma/schema.prisma"
+      }
+    },
+    "prisma-migrate": {
+      "executor": "@nx-tools/nx-prisma:migrate",
+      "options": {
+        "schema": "apps/api-languages/prisma/schema.prisma"
+      }
+    },
+    "prisma-rollback": {
+      "executor": "@nx-tools/nx-prisma:rollback",
+      "options": {
+        "schema": "apps/api-languages/prisma/schema.prisma"
+      }
+    },
+    "prisma-seed": {
+      "executor": "@nx-tools/nx-prisma:seed",
+      "options": {
+        "script": "apps/api-languages/prisma/seed.ts",
+        "tsConfig": "apps/api-languages/tsconfig.app.json"
       }
     }
   },

@@ -36,18 +36,18 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
           hostPort : var.service_config.host_port
         }
       ]
-      secrets = flatten([
+      secrets = flatten(concat([
         for param in aws_ssm_parameter.parameters : {
           name      = param.tags.name
           valueFrom = param.arn
         }
         ],
         [
-          for param in aws_ssm_parameter.rds : {
-            name      = param.tags.name
-            valueFrom = param.arn
+          for param in module.rds : {
+            name      = "PG_DATABASE_URL"
+            valueFrom = param.rds_ssm_url.arn
           }
-      ])
+      ]))
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -161,6 +161,17 @@ resource "aws_route53_record" "record" {
 }
 
 module "rds" {
-  count = var.create_rds_cluster ? 1 : 0
-  source = "../aurora"
+  count         = var.create_rds_cluster ? 1 : 0
+  source        = "../aurora"
+  env           = var.env
+  name          = var.service_config.name
+  doppler_token = var.doppler_token
+}
+
+resource "doppler_secret" "rds_url" {
+  count   = var.create_rds_cluster ? 1 : 0
+  project = var.service_config.name
+  config  = var.env == "prod" ? "prd" : "stg"
+  name    = "PG_DATABASE_URL"
+  value   = module.rds[0].rds_ssm_url.value
 }

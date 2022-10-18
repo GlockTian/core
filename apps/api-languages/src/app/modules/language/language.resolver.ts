@@ -6,30 +6,38 @@ import {
   ResolveReference,
   Parent
 } from '@nestjs/graphql'
+import { Inject } from '@nestjs/common'
 import { TranslationField } from '@core/nest/decorators/TranslationField'
-import { Language, LanguageIdType } from '../../__generated__/graphql'
-import { LanguageService } from './language.service'
+import { LanguageIdType } from '../../__generated__/graphql'
+import { PrismaService } from '../../lib/prisma.service'
+import { Language } from '.prisma/api-languages-client'
 
 @Resolver('Language')
 export class LanguageResolver {
-  constructor(private readonly languageService: LanguageService) {}
+  constructor(
+    @Inject(PrismaService) private readonly prismaService: PrismaService
+  ) {}
 
   @Query()
   async languages(
     @Args('offset') offset: number,
     @Args('limit') limit: number
   ): Promise<Language[]> {
-    return await this.languageService.getAll(offset, limit)
+    return await this.prismaService.language.findMany({
+      include: { name: true },
+      skip: offset,
+      take: limit
+    })
   }
 
   @Query()
   async language(
     @Args('id') id: string,
     @Args('idType') idType = LanguageIdType.databaseId
-  ): Promise<Language> {
+  ): Promise<Language | null> {
     return idType === LanguageIdType.databaseId
-      ? await this.languageService.get(id)
-      : await this.languageService.getByBcp47(id)
+      ? await this.prismaService.language.findUnique({ where: { id } })
+      : await this.prismaService.language.findFirst({ where: { bcp47: id } })
   }
 
   @ResolveField()
@@ -44,7 +52,9 @@ export class LanguageResolver {
   async resolveReference(reference: {
     __typename: 'Language'
     id: string
-  }): Promise<Language> {
-    return await this.languageService.get(reference.id)
+  }): Promise<Language | null> {
+    return await this.prismaService.language.findUnique({
+      where: { id: reference.id }
+    })
   }
 }

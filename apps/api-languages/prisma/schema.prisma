@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../node_modules/.prisma/api-languages-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PG_DATABASE_URL")
+}
+
+model Language {
+  id            String    @id @default(uuid())
+  name          LanguageNameTranslation[]
+  bcp47         String?   
+  iso3          String?
+  countries     LanguagesInCountries[]   
+}
+
+model LanguageNameTranslation {
+  languageId    String
+  value         String  
+  primary       Boolean   @default(false)
+  language      Language  @relation(fields: [parentLanguageId], references: [id])
+  parentLanguageId String
+  @@id([languageId, parentLanguageId])
+}
+
+model Country {
+  id            String    @id @default(uuid())
+  name          CountryNameTranslation[]
+  slug          CountrySlugTranslation[]
+  population    Int
+  continent     CountryContinentTranslation[]
+  languages     LanguagesInCountries[]
+  latitude      Float
+  longitude     Float
+  image         String?
+}
+
+model CountryNameTranslation {
+  languageId    String
+  value         String  
+  primary       Boolean   @default(false)
+  country Country   @relation(fields: [countryId], references: [id])
+  countryId String
+  @@id([countryId, languageId])
+}
+
+model CountrySlugTranslation {
+  languageId    String
+  value         String    
+  primary       Boolean   @default(false)
+  country Country   @relation(fields: [countryId], references: [id])
+  countryId String
+  @@id([countryId, languageId])
+  @@index([value])
+}
+
+model CountryContinentTranslation {
+  languageId    String
+  value         String  
+  primary       Boolean   @default(false)
+  country Country   @relation(fields: [countryId], references: [id])
+  countryId String
+  @@id([countryId, languageId])
+}
+
+model LanguagesInCountries {
+  languageId    String
+  countryId     String
+  language      Language  @relation(fields: [languageId], references: [id])
+  country       Country   @relation(fields: [countryId], references: [id])
+  @@id([languageId, countryId])
+}

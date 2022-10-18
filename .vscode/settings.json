@@ -30,6 +30,16 @@
       "database": "users",
       "username": "postgres",
       "password": "postgres"
+    },
+    {
+      "previewLimit": 50,
+      "server": "db",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "languages",
+      "database": "languages",
+      "username": "postgres",
+      "password": "postgres"
     }
   ]
 }
