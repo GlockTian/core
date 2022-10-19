@@ -8,9 +8,13 @@ import {
   Parent
 } from '@nestjs/graphql'
 import { Inject } from '@nestjs/common'
-import { IdType } from '../../__generated__/graphql'
 import { PrismaService } from '../../lib/prisma.service'
-import { Country, Language } from '.prisma/api-languages-client'
+import { Country } from '.prisma/api-countries-client'
+
+export enum IdType {
+  databaseId = 'databaseId',
+  slug = 'slug'
+}
 
 @Resolver('Country')
 export class CountryResolver {
@@ -21,7 +25,7 @@ export class CountryResolver {
   @Query()
   async countries(): Promise<Country[]> {
     return (await this.prismaService.country.findMany({
-      include: { name: true, slug: true, continent: true, languages: true }
+      include: { name: true, slug: true, continent: true }
     })) as unknown as Country[]
   }
 
@@ -41,7 +45,7 @@ export class CountryResolver {
     }
     return await this.prismaService.country.findUnique({
       where: { id: countryId },
-      include: { name: true, slug: true, continent: true, languages: true }
+      include: { name: true, slug: true, continent: true }
     })
   }
 
@@ -68,15 +72,6 @@ export class CountryResolver {
     @Args('languageId') languageId?: string,
     @Args('primary') primary?: boolean
   ): void {}
-
-  @ResolveField()
-  async languages(
-    @Parent() country: Country & { languageIds: string[] }
-  ): Promise<Language[]> {
-    return await this.prismaService.language.findMany({
-      where: { id: { in: country.languageIds } }
-    })
-  }
 
   @ResolveReference()
   async resolveReference(reference: {

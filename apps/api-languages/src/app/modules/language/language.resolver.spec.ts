@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing'
+import { PrismaService } from '../../lib/prisma.service'
 import { LanguageResolver } from './language.resolver'
-import { LanguageService } from './language.service'
 
 describe('LangaugeResolver', () => {
-  let resolver: LanguageResolver, service: LanguageService
+  let resolver: LanguageResolver, prisma: PrismaService
 
   const language = {
     id: '20615',
@@ -23,43 +23,50 @@ describe('LangaugeResolver', () => {
   }
 
   beforeEach(async () => {
-    const languageService = {
-      provide: LanguageService,
-      useFactory: () => ({
-        get: jest.fn(() => language),
-        getAll: jest.fn(() => [language, language])
-      })
-    }
     const module: TestingModule = await Test.createTestingModule({
-      providers: [LanguageResolver, languageService]
+      providers: [LanguageResolver, PrismaService]
     }).compile()
     resolver = module.get<LanguageResolver>(LanguageResolver)
-    service = await module.resolve(LanguageService)
+    prisma = module.get<PrismaService>(PrismaService)
   })
 
   describe('languages', () => {
     it('returns Languages', async () => {
+      prisma.language.findMany = jest
+        .fn()
+        .mockReturnValueOnce([language, language])
       expect(await resolver.languages(1, 2)).toEqual([language, language])
-      expect(service.getAll).toHaveBeenCalledWith(1, 2)
+      expect(prisma.language.findMany).toHaveBeenCalledWith({
+        include: { name: true },
+        skip: 1,
+        take: 2
+      })
     })
   })
 
   describe('language', () => {
     it('should return language', async () => {
+      prisma.language.findUnique = jest.fn().mockReturnValueOnce(language)
       expect(await resolver.language(language.id)).toEqual(language)
+      expect(prisma.language.findUnique).toHaveBeenCalledWith({
+        where: { id: language.id }
+      })
     })
   })
 
   describe('name', () => {
     it('should return translations', () => {
+      prisma.language.findUnique = jest.fn().mockReturnValueOnce(language)
       expect(resolver.name(language)).toEqual(language.name)
     })
 
     it('should return translations filtered by languageId', () => {
+      prisma.language.findUnique = jest.fn().mockReturnValueOnce(language)
       expect(resolver.name(language, '529')).toEqual([language.name[1]])
     })
 
     it('should return translations filtered by primary', () => {
+      prisma.language.findUnique = jest.fn().mockReturnValueOnce(language)
       expect(resolver.name(language, undefined, true)).toEqual([
         language.name[0]
       ])
@@ -68,6 +75,7 @@ describe('LangaugeResolver', () => {
 
   describe('resolveReference', () => {
     it('should return language', async () => {
+      prisma.language.findUnique = jest.fn().mockReturnValueOnce(language)
       expect(
         await resolver.resolveReference({
           __typename: 'Language',

@@ -49,7 +49,7 @@
             "command": "nx serve api-videos"
           },
           {
-            "command": "nx serve api-media"
+            "command": "nx serve api-countries"
           },
           {
             "command": "nx serve api-gateway"

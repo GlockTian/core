@@ -5,17 +5,15 @@ import {
   ApolloFederationDriver,
   ApolloFederationDriverConfig
 } from '@nestjs/apollo'
-import { LanguageModule } from './modules/language/language.module'
-import { TranslationModule } from './modules/translation/translation.module'
+import { CountryModule } from './modules/country/country.module'
 
 @Module({
   imports: [
-    LanguageModule,
-    TranslationModule,
+    CountryModule,
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
       typePaths: [
-        join(process.cwd(), 'apps/api-languages/src/app/**/*.graphql'),
+        join(process.cwd(), 'apps/api-countries/src/app/**/*.graphql'),
         join(process.cwd(), 'assets/**/*.graphql')
       ],
       cors: true,

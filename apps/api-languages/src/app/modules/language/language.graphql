@@ -9,7 +9,13 @@ enum LanguageIdType {
   databaseId
   bcp47
 }
+
 extend type Query {
   languages(offset: Int, limit: Int): [Language!]!
   language(id: ID!, idType: LanguageIdType): Language
+}
+
+extend type Country @key(fields: "id") {
+  id: ID! @external
+  languages: [Language!]!
 }

@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { PrismaService } from '../../lib/prisma.service'
-import { IdType } from '../../__generated__/graphql'
-import { CountryResolver } from './country.resolver'
+import { CountryResolver, IdType } from './country.resolver'
 
 describe('LangaugeResolver', () => {
   let resolver: CountryResolver, prisma: PrismaService

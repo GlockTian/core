@@ -1,0 +1,17 @@
+enum IdType {
+  databaseId
+  slug
+}
+
+type Country @key(fields: "id") {
+  id: ID!
+  population: Int!
+  latitude: Float!
+  longitude: Float!
+  image: String
+}
+
+extend type Query {
+  countries: [Country!]!
+  country(id: ID!, idType: IdType): Country!
+}

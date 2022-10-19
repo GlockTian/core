@@ -150,17 +150,22 @@ input CardBlockUpdateInput {
 }
 
 type Country
-  @join__owner(graph: LANGUAGES)
+  @join__owner(graph: COUNTRIES)
+  @join__type(graph: COUNTRIES, key: "id")
   @join__type(graph: LANGUAGES, key: "id")
 {
   continent(languageId: ID, primary: Boolean): [Translation!]! @join__field(graph: LANGUAGES)
-  id: ID! @join__field(graph: LANGUAGES)
-  image: String @join__field(graph: LANGUAGES)
+  id: ID! @join__field(graph: COUNTRIES)
+  image: String @join__field(graph: COUNTRIES)
   languages: [Language!]! @join__field(graph: LANGUAGES)
-  latitude: Float! @join__field(graph: LANGUAGES)
-  longitude: Float! @join__field(graph: LANGUAGES)
+
+  """
+  slug is a permanent link to the country. It should only be appended, not edited or deleted
+  """
+  latitude: Float! @join__field(graph: COUNTRIES)
+  longitude: Float! @join__field(graph: COUNTRIES)
   name(languageId: ID, primary: Boolean): [Translation!]! @join__field(graph: LANGUAGES)
-  population: Int! @join__field(graph: LANGUAGES)
+  population: Int! @join__field(graph: COUNTRIES)
 
   """
   slug is a permanent link to the country. It should only be appended, not edited or deleted
@@ -332,6 +337,7 @@ input ImageBlockUpdateInput {
 scalar join__FieldSet
 
 enum join__Graph {
+  COUNTRIES @join__graph(name: "countries" url: "http://127.0.0.1:4005/graphql")
   JOURNEYS @join__graph(name: "journeys" url: "http://127.0.0.1:4001/graphql")
   LANGUAGES @join__graph(name: "languages" url: "http://127.0.0.1:4003/graphql")
   USERS @join__graph(name: "users" url: "http://127.0.0.1:4002/graphql")
@@ -615,8 +621,8 @@ type Query {
   adminJourney(id: ID!, idType: IdType): Journey @join__field(graph: JOURNEYS)
   adminJourneys(status: [JourneyStatus!], template: Boolean): [Journey!]! @join__field(graph: JOURNEYS)
   adminJourneysReport(reportType: JourneysReportType!): PowerBiEmbed @join__field(graph: JOURNEYS)
-  countries: [Country!]! @join__field(graph: LANGUAGES)
-  country(id: ID!, idType: IdType): Country! @join__field(graph: LANGUAGES)
+  countries: [Country!]! @join__field(graph: COUNTRIES)
+  country(id: ID!, idType: IdType): Country! @join__field(graph: COUNTRIES)
   episodes(idType: IdType, limit: Int, offset: Int, playlistId: ID!, where: VideosFilter): [Video!]! @join__field(graph: VIDEOS)
   getUserRole: UserRole @join__field(graph: JOURNEYS)
   journey(id: ID!, idType: IdType): Journey @join__field(graph: JOURNEYS)

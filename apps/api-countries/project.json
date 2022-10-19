@@ -1,20 +1,20 @@
 {
-  "root": "apps/api-users",
-  "sourceRoot": "apps/api-users/src",
+  "root": "apps/api-countries",
+  "sourceRoot": "apps/api-countries/src",
   "projectType": "application",
   "targets": {
     "build": {
       "executor": "@nrwl/node:build",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/apps/api-users",
-        "main": "apps/api-users/src/main.ts",
-        "tsConfig": "apps/api-users/tsconfig.app.json",
+        "outputPath": "dist/apps/api-countries",
+        "main": "apps/api-countries/src/main.ts",
+        "tsConfig": "apps/api-countries/tsconfig.app.json",
         "assets": [
-          "apps/api-users/src/assets",
+          "apps/api-countries/src/assets",
           {
             "glob": "**/*.graphql",
-            "input": "apps/api-users/src/app/",
+            "input": "apps/api-countries/src/app/",
             "output": "./assets"
           }
         ],
@@ -27,8 +27,8 @@
           "inspect": false,
           "fileReplacements": [
             {
-              "replace": "apps/api-users/src/environments/environment.ts",
-              "with": "apps/api-users/src/environments/environment.prod.ts"
+              "replace": "apps/api-countries/src/environments/environment.ts",
+              "with": "apps/api-countries/src/environments/environment.prod.ts"
             }
           ]
         }
@@ -37,21 +37,21 @@
     "serve": {
       "executor": "@nrwl/node:execute",
       "options": {
-        "buildTarget": "api-users:build"
+        "buildTarget": "api-countries:build"
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/api-users/**/*.ts"]
+        "lintFilePatterns": ["apps/api-countries/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/api-users"],
+      "outputs": ["coverage/apps/api-countries"],
       "options": {
-        "jestConfig": "apps/api-users/jest.config.js",
+        "jestConfig": "apps/api-countries/jest.config.js",
         "passWithNoTests": true
       }
     },
@@ -60,7 +60,7 @@
       "options": {
         "commands": [
           {
-            "command": "rover subgraph introspect http://localhost:4002/graphql > apps/api-users/schema.graphql"
+            "command": "rover subgraph introspect http://localhost:4005/graphql > apps/api-countries/schema.graphql"
           }
         ]
       }
@@ -70,7 +70,7 @@
       "options": {
         "commands": [
           {
-            "command": "DOPPLER_TOKEN=$DOPPLER_API_USERS_TOKEN doppler secrets download --no-file --format=env-no-quotes --project api-users > apps/api-users/.env"
+            "command": "DOPPLER_TOKEN=$DOPPLER_API_LANGUAGES_TOKEN doppler secrets download --no-file --format=env-no-quotes --project api-countries > apps/api-countries/.env"
           }
         ]
       }
@@ -78,26 +78,26 @@
     "prisma-generate": {
       "executor": "@nx-tools/nx-prisma:generate",
       "options": {
-        "schema": "apps/api-users/prisma/schema.prisma"
+        "schema": "apps/api-countries/prisma/schema.prisma"
       }
     },
     "prisma-migrate": {
       "executor": "@nx-tools/nx-prisma:migrate",
       "options": {
-        "schema": "apps/api-users/prisma/schema.prisma"
+        "schema": "apps/api-countries/prisma/schema.prisma"
       }
     },
     "prisma-rollback": {
       "executor": "@nx-tools/nx-prisma:rollback",
       "options": {
-        "schema": "apps/api-users/prisma/schema.prisma"
+        "schema": "apps/api-countries/prisma/schema.prisma"
       }
     },
-    "seed": {
+    "prisma-seed": {
       "executor": "@nx-tools/nx-prisma:seed",
       "options": {
-        "script": "apps/api-users/prisma/seed.ts",
-        "tsConfig": "apps/api-users/tsconfig.app.json"
+        "script": "apps/api-countries/prisma/seed.ts",
+        "tsConfig": "apps/api-countries/tsconfig.app.json"
       }
     }
   },

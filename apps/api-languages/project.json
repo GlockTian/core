@@ -34,24 +34,10 @@
         }
       }
     },
-    "serve-nowatch": {
+    "serve": {
       "executor": "@nrwl/node:execute",
       "options": {
         "buildTarget": "api-languages:build"
-      }
-    },
-    "serve": {
-      "executor": "@nrwl/workspace:run-commands",
-      "options": {
-        "commands": [
-          {
-            "command": "nx serve-nowatch api-languages"
-          },
-          {
-            "command": "npx ts-node apps/api-languages/src/generate-typings.ts"
-          }
-        ],
-        "parallel": true
       }
     },
     "lint": {

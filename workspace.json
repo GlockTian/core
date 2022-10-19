@@ -1,6 +1,7 @@
 {
   "version": 2,
   "projects": {
+    "api-countries": "apps/api-countries",
     "api-gateway": "apps/api-gateway",
     "api-journeys": "apps/api-journeys",
     "api-languages": "apps/api-languages",

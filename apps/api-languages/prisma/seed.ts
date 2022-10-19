@@ -1,16 +1,9 @@
-import { float } from 'aws-sdk/clients/lightsail'
-import { isEmpty, omit } from 'lodash'
+import { isEmpty } from 'lodash'
 import fetch from 'cross-fetch'
 import slugify from 'slugify'
-import { PrismaClient, Language, Country } from '.prisma/api-languages-client'
+import { PrismaClient, Language } from '.prisma/api-languages-client'
 
 const prisma = new PrismaClient()
-
-// interface FullCountry extends Country {
-//   name: CountryNameTranslation[]
-//   continent: CountryContinentTranslation[]
-//   slug: CountrySlugTranslation[]
-// }
 
 interface MediaLanguage {
   languageId: number
@@ -19,34 +12,6 @@ interface MediaLanguage {
   nameNative: string
   metadataLanguageTag: string
   name: string
-}
-
-interface MediaCountry {
-  countryId: number
-  name: string
-  continentName: string
-  metadataLanguageTag: string
-  longitude: float
-  latitude: float
-  counts: {
-    languageCount: {
-      value: number
-    }
-    population: {
-      value: number
-    }
-  }
-  assets: {
-    flagUrls: {
-      png8: string
-      webpLossy50: string
-    }
-  }
-  languageIds: number[]
-}
-
-interface MetadataLanguageTag {
-  tag: string
 }
 
 async function getLanguage(languageId: string): Promise<Language | null> {
@@ -136,21 +101,6 @@ async function digestMediaLanguageMetadata(
   })
 }
 
-async function getCountries(language = 'en'): Promise<MediaCountry[]> {
-  const response: {
-    _embedded: { mediaCountries: MediaCountry[] }
-  } = await (
-    await fetch(
-      `https://api.arclight.org/v2/media-countries?limit=5000&apiKey=${
-        process.env.ARCLIGHT_API_KEY ?? ''
-      }&metadataLanguageTags=${language}&expand=languageIds`
-    )
-  ).json()
-  return response._embedded.mediaCountries
-}
-
-const usedTitles: string[] = []
-
 export function getIteration(slug: string, collection: string[]): string {
   const exists = collection.find((t) => t === slug)
   if (exists != null && slug !== '') {
@@ -170,157 +120,6 @@ export function getSeoSlug(title: string, collection: string[]): string {
   return newSlug
 }
 
-function digestCountries(countries: MediaCountry[]): void {
-  console.log('countries:', '529')
-  countries.forEach((country) => {
-    const body: Country = {
-      id: country.countryId.toString(),
-      population: country.counts.population.value,
-      latitude: country.latitude,
-      longitude: country.longitude,
-      image: country.assets.flagUrls.png8
-    }
-    void prisma.country.upsert({
-      where: { id: country.countryId.toString() },
-      update: omit(body, ['id']),
-      create: body
-    })
-    void prisma.countryNameTranslation.upsert({
-      where: {
-        countryId_languageId: {
-          countryId: country.countryId.toString(),
-          languageId: '529'
-        }
-      },
-      update: {
-        value: country.name
-      },
-      create: {
-        value: country.name,
-        languageId: '529',
-        primary: true,
-        countryId: country.countryId.toString()
-      }
-    })
-    void prisma.countrySlugTranslation.upsert({
-      where: {
-        countryId_languageId: {
-          countryId: country.countryId.toString(),
-          languageId: '529'
-        }
-      },
-      update: {
-        value: getSeoSlug(country.name, usedTitles)
-      },
-      create: {
-        value: getSeoSlug(country.name, usedTitles),
-        languageId: '529',
-        primary: true,
-        countryId: country.countryId.toString()
-      }
-    })
-    void prisma.countryContinentTranslation.upsert({
-      where: {
-        countryId_languageId: {
-          countryId: country.countryId.toString(),
-          languageId: '529'
-        }
-      },
-      update: {
-        value: country.name
-      },
-      create: {
-        value: country.continentName,
-        languageId: '529',
-        primary: true,
-        countryId: country.countryId.toString()
-      }
-    })
-    country.languageIds.forEach((languageId) => {
-      void prisma.languagesInCountries.create({
-        data: {
-          countryId: country.countryId.toString(),
-          languageId: languageId.toString()
-        }
-      })
-    })
-  })
-}
-
-function digestTranslatedCountries(
-  countries: MediaCountry[],
-  languageId: string
-): void {
-  if (languageId === '529') return
-  console.log('countries:', languageId)
-  countries.forEach((country) => {
-    void prisma.countryNameTranslation.upsert({
-      where: {
-        countryId_languageId: {
-          countryId: country.countryId.toString(),
-          languageId
-        }
-      },
-      update: {
-        value: country.name
-      },
-      create: {
-        value: country.name,
-        languageId,
-        primary: false,
-        countryId: country.countryId.toString()
-      }
-    })
-    void prisma.countrySlugTranslation.upsert({
-      where: {
-        countryId_languageId: {
-          countryId: country.countryId.toString(),
-          languageId
-        }
-      },
-      update: {
-        value: getSeoSlug(country.name, usedTitles)
-      },
-      create: {
-        value: getSeoSlug(country.name, usedTitles),
-        languageId,
-        primary: false,
-        countryId: country.countryId.toString()
-      }
-    })
-    void prisma.countryContinentTranslation.upsert({
-      where: {
-        countryId_languageId: {
-          countryId: country.countryId.toString(),
-          languageId
-        }
-      },
-      update: {
-        value: country.name
-      },
-      create: {
-        value: country.continentName,
-        languageId,
-        primary: false,
-        countryId: country.countryId.toString()
-      }
-    })
-  })
-}
-
-async function getMetadataLanguageTags(): Promise<MetadataLanguageTag[]> {
-  const response: {
-    _embedded: { metadataLanguageTags: MetadataLanguageTag[] }
-  } = await (
-    await fetch(
-      `https://api.arclight.org/v2/metadata-language-tags?limit=5000&apiKey=${
-        process.env.ARCLIGHT_API_KEY ?? ''
-      }`
-    )
-  ).json()
-  return response._embedded.metadataLanguageTags
-}
-
 async function main(): Promise<void> {
   const mediaLanguages = await getMediaLanguages()
 
@@ -331,19 +130,6 @@ async function main(): Promise<void> {
 
   for (const mediaLanguage of mediaLanguages) {
     await digestMediaLanguageMetadata(mediaLanguage)
-  }
-
-  const countries = await getCountries()
-  void digestCountries(countries)
-
-  const metadataLanguages = await getMetadataLanguageTags()
-  for (const metaDataLanguage of metadataLanguages) {
-    const languageId = mediaLanguages.find(
-      (l) => l.bcp47 === metaDataLanguage.tag
-    )?.languageId
-    if (languageId == null) continue
-    const translatedCountries = await getCountries(metaDataLanguage.tag)
-    void digestTranslatedCountries(translatedCountries, languageId.toString())
   }
 }
 main().catch((e) => {
