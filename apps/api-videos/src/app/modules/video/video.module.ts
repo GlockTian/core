@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common'
 import { DatabaseModule } from '@core/nest/database/DatabaseModule'
+import { PrismaService } from '../../lib/prisma.service'
 import { VideoResolver } from './video.resolver'
-import { VideoService } from './video.service'
 
 @Module({
   imports: [DatabaseModule],
-  providers: [VideoResolver, VideoService],
-  exports: [VideoService]
+  providers: [VideoResolver, PrismaService],
+  exports: []
 })
 export class VideoModule {}

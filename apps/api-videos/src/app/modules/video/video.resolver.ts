@@ -1,4 +1,5 @@
 import { TranslationField } from '@core/nest/decorators/TranslationField'
+import { Inject } from '@nestjs/common'
 import {
   Resolver,
   Query,
@@ -8,13 +9,27 @@ import {
   ResolveField,
   Parent
 } from '@nestjs/graphql'
+import { PrismaService } from '../../lib/prisma.service'
+import { Video, VideoType } from '.prisma/api-videos-client'
 
-import { IdType, Video, VideosFilter } from '../../__generated__/graphql'
-import { VideoService } from './video.service'
+export enum IdType {
+  databaseId = 'databaseId',
+  slug = 'slug'
+}
+
+type Nullable<T> = T | null
+export class VideosFilter {
+  availableVariantLanguageIds?: Nullable<string[]>
+  title?: Nullable<string>
+  tagId?: Nullable<string>
+  types?: Nullable<VideoType[]>
+}
 
 @Resolver('Video')
 export class VideoResolver {
-  constructor(private readonly videoService: VideoService) {}
+  constructor(
+    @Inject(PrismaService) private readonly prismaService: PrismaService
+  ) {}
 
   @Query('episodes')
   async episodesQuery(
@@ -28,7 +43,16 @@ export class VideoResolver {
     const variantLanguageId = info.fieldNodes[0].selectionSet.selections
       .find(({ name }) => name.value === 'variant')
       ?.arguments.find(({ name }) => name.value === 'languageId')?.value?.value
-    return await this.videoService.filterEpisodes({
+    return await this.prismaService.video.findMany({
+      where: {
+        playlistId,
+        idType,
+        title: { some: { value: where?.title ?? undefined } },
+        tagId: where?.tagId ?? undefined
+      }
+    })
+
+    filterEpisodes({
       playlistId,
       idType,
       title: where?.title ?? undefined,
@@ -52,7 +76,7 @@ export class VideoResolver {
     const variantLanguageId = info.fieldNodes[0].selectionSet.selections
       .find(({ name }) => name.value === 'variant')
       ?.arguments.find(({ name }) => name.value === 'languageId')?.value?.value
-    return await this.videoService.filterAll({
+    return await this.prismaService.video.filterAll({
       title: where?.title ?? undefined,
       tagId: where?.tagId ?? undefined,
       availableVariantLanguageIds:
@@ -69,13 +93,20 @@ export class VideoResolver {
     @Info() info,
     @Args('id') id: string,
     @Args('idType') idType: IdType = IdType.databaseId
-  ): Promise<Video> {
+  ): Promise<Video | null> {
     const variantLanguageId = info.fieldNodes[0].selectionSet.selections
       .find(({ name }) => name.value === 'variant')
       ?.arguments.find(({ name }) => name.value === 'languageId')?.value?.value
     return idType === IdType.databaseId
-      ? await this.videoService.getVideo(id, variantLanguageId)
-      : await this.videoService.getVideoBySlug(id, variantLanguageId)
+      ? await this.prismaService.video.findFirst({
+          where: { id, variantLanguageIds: { has: variantLanguageId } }
+        })
+      : await this.prismaService.video.findFirst({
+          where: {
+            slug: { some: { value: id } },
+            variantLanguageIds: { has: variantLanguageId }
+          }
+        })
   }
 
   @ResolveReference()
@@ -83,17 +114,21 @@ export class VideoResolver {
     __typename: 'Video'
     id: string
     primaryLanguageId?: string | null
-  }): Promise<Video> {
-    return await this.videoService.getVideo(
-      reference.id,
-      reference.primaryLanguageId ?? undefined
-    )
+  }): Promise<Video | null> {
+    return await this.prismaService.video.findFirst({
+      where: {
+        id: reference.id,
+        primaryLanguageId: reference.primaryLanguageId ?? undefined
+      }
+    })
   }
 
   @ResolveField()
   async episodes(@Parent() video: Video): Promise<Video[] | null> {
     return video.episodeIds != null
-      ? await this.videoService.getVideosByIds(video.episodeIds)
+      ? await this.prismaService.video.findMany({
+          where: { id: { in: video.episodeIds } }
+        })
       : null
   }
 

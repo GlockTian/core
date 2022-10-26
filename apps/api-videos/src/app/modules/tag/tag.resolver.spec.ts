@@ -1,33 +1,28 @@
 import { Test, TestingModule } from '@nestjs/testing'
+import { PrismaService } from '../../lib/prisma.service'
 import { VideoTagResolver } from './tag.resolver'
-import { VideoTagService } from './tag.service'
 import { tag } from './testData'
 
 describe('VideoTagResolver', () => {
-  let resolver: VideoTagResolver, service: VideoTagService
+  let resolver: VideoTagResolver, prisma: PrismaService
 
   beforeEach(async () => {
-    const videoTagService = {
-      provide: VideoTagService,
-      useFactory: () => ({
-        getAll: jest.fn(() => [tag, tag]),
-        get: jest.fn(() => tag)
-      })
-    }
     const module: TestingModule = await Test.createTestingModule({
-      providers: [videoTagService, VideoTagResolver]
+      providers: [PrismaService, VideoTagResolver]
     }).compile()
     resolver = module.get<VideoTagResolver>(VideoTagResolver)
-    service = await module.resolve(VideoTagService)
+    prisma = module.get<PrismaService>(PrismaService)
   })
 
   it('returns a tag', async () => {
+    prisma.videoTag.findMany = jest.fn().mockReturnValueOnce(tag)
     expect(await resolver.videoTag('JFM1')).toEqual(tag)
-    expect(service.get).toHaveBeenCalledWith('JFM1')
+    expect(prisma.videoTag.findMany).toHaveBeenCalledWith('JFM1')
   })
 
   it('returns all tags', async () => {
+    prisma.videoTag.findUnique = jest.fn().mockReturnValueOnce([tag, tag])
     expect(await resolver.videoTags()).toEqual([tag, tag])
-    expect(service.getAll).toHaveBeenCalledWith()
+    expect(prisma.videoTag.findUnique).toHaveBeenCalledWith()
   })
 })

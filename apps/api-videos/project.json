@@ -40,24 +40,10 @@
         "command": "npx ts-node apps/api-videos/db/seed.ts"
       }
     },
-    "serve-nowatch": {
+    "serve": {
       "executor": "@nrwl/node:execute",
       "options": {
         "buildTarget": "api-videos:build"
-      }
-    },
-    "serve": {
-      "executor": "@nrwl/workspace:run-commands",
-      "options": {
-        "commands": [
-          {
-            "command": "nx serve-nowatch api-videos"
-          },
-          {
-            "command": "npx ts-node apps/api-videos/src/generate-typings.ts"
-          }
-        ],
-        "parallel": true
       }
     },
     "lint": {
@@ -93,6 +79,31 @@
             "command": "DOPPLER_TOKEN=$DOPPLER_API_VIDEOS_TOKEN doppler secrets download --no-file --format=env-no-quotes --project api-videos > apps/api-videos/.env"
           }
         ]
+      }
+    },
+    "prisma-generate": {
+      "executor": "@nx-tools/nx-prisma:generate",
+      "options": {
+        "schema": "apps/api-videos/prisma/schema.prisma"
+      }
+    },
+    "prisma-migrate": {
+      "executor": "@nx-tools/nx-prisma:migrate",
+      "options": {
+        "schema": "apps/api-videos/prisma/schema.prisma"
+      }
+    },
+    "prisma-rollback": {
+      "executor": "@nx-tools/nx-prisma:rollback",
+      "options": {
+        "schema": "apps/api-videos/prisma/schema.prisma"
+      }
+    },
+    "prisma-seed": {
+      "executor": "@nx-tools/nx-prisma:seed",
+      "options": {
+        "script": "apps/api-videos/prisma/seed.ts",
+        "tsConfig": "apps/api-videos/tsconfig.app.json"
       }
     }
   },

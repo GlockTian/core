@@ -1,0 +1,158 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../node_modules/.prisma/api-videos-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PG_DATABASE_URL")
+}
+
+enum VideoType {
+episode
+  standalone
+  playlist
+}
+model Video {
+  id                  String    @id @default(uuid())
+  type                VideoType
+  primaryLanguageId   String
+  title               VideoTitleTranslation[]
+  seoTitle            VideoSeoTitleTranslation[]
+  snippet             VideoSnippetTranslation[]
+  description         VideoDescriptionTranslation[]
+  studyQuestions      VideoStudyQuestionTranslation[]
+  image               String?
+  imageAlt            VideoImageAltTranslation[]
+  variantLanguageIds  String[]
+  slug                VideoSlugTranslation[]
+  noIndex             Boolean
+  episodeIds          String[]
+  variants            VideoVariant[]
+  tags                VideoTag[]
+  playlistId          String?
+}
+
+model VideoTitleTranslation {
+  languageId    String
+  value         String  
+  primary       Boolean   @default(false)
+  video         Video  @relation(fields: [videoId], references: [id])
+  videoId       String
+  @@id([languageId, videoId])
+}
+
+model VideoSeoTitleTranslation {
+  languageId    String
+  value         String  
+  primary       Boolean   @default(false)
+  video      Video  @relation(fields: [videoId], references: [id])
+  videoId String
+  @@id([languageId, videoId])
+}
+
+model VideoSnippetTranslation {
+  languageId    String
+  value         String  
+  primary       Boolean   @default(false)
+  video      Video  @relation(fields: [videoId], references: [id])
+  videoId String
+  @@id([languageId, videoId])
+}
+
+model VideoDescriptionTranslation {
+  languageId    String
+  value         String  
+  primary       Boolean   @default(false)
+  video      Video  @relation(fields: [videoId], references: [id])
+  videoId String
+  @@id([languageId, videoId])
+}
+
+model VideoStudyQuestionTranslation {
+  languageId    String
+  value         String  
+  primary       Boolean   @default(false)
+  video      Video  @relation(fields: [videoId], references: [id])
+  videoId String
+  position Int
+  @@id([languageId, videoId, position])
+}
+
+model VideoImageAltTranslation {
+  languageId    String
+  value         String  
+  primary       Boolean   @default(false)
+  video      Video  @relation(fields: [videoId], references: [id])
+  videoId String
+  @@id([languageId, videoId])
+}
+
+model VideoSlugTranslation {
+  languageId    String
+  value         String @unique
+  primary       Boolean   @default(false)
+  video         Video  @relation(fields: [videoId], references: [id])
+  videoId       String
+  @@id([languageId, videoId, value])
+}
+
+model VideoTag {
+  videoId String
+  video   Video @relation(fields: [videoId], references: [id])
+  tagId   String
+  tag     Tag @relation(fields: [tagId], references: [id])
+  @@id([videoId, tagId])
+}
+
+model Tag {
+  id            String @id()
+  videoTags     VideoTag[]
+  title         TagTitleTranslation[]
+}
+
+model TagTitleTranslation {
+  languageId    String
+  value         String  
+  primary       Boolean   @default(false)
+  Tag           Tag  @relation(fields: [tagId], references: [id])
+  tagId         String
+  @@id([tagId, languageId])
+}
+
+model VideoVariant {
+  id String @id
+  hls String?
+  downloads VideoVariantDownload[]
+  duration Int
+  languageId String
+  subtitle VideoVariantSubtitleTranslation[]
+  video Video @relation(fields: [videoId], references: [id])
+  videoId String
+}
+
+model VideoVariantSubtitleTranslation {
+  languageId    String
+  value         String  
+  primary       Boolean   @default(false)
+  videoVariant     VideoVariant  @relation(fields: [videoVariantId], references: [id])
+  videoVariantId String
+  @@id([languageId, videoVariantId])
+}
+
+enum VideoVariantDownloadQuality {
+  low
+  high
+}
+
+model VideoVariantDownload {
+  quality VideoVariantDownloadQuality
+  size Float
+  url String
+  videoVariant VideoVariant @relation(fields: [videoVariantId], references: [id])
+  videoVariantId String
+  @@id([videoVariantId, quality])
+}
