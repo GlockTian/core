@@ -75,15 +75,22 @@ export class VideoResolver {
     const variantLanguageId = info.fieldNodes[0].selectionSet.selections
       .find(({ name }) => name.value === 'variant')
       ?.arguments.find(({ name }) => name.value === 'languageId')?.value?.value
-    return await this.prismaService.video.filterAll({
-      title: where?.title ?? undefined,
+
+    const videoWhere = {
       tagId: where?.tagId ?? undefined,
-      availableVariantLanguageIds:
-        where?.availableVariantLanguageIds ?? undefined,
+      title:
+        where?.title == null ? undefined : { some: { value: where.title } },
       variantLanguageId,
       types: where?.types ?? undefined,
-      offset,
-      limit
+      variantLanguageIds: {
+        in: where?.availableVariantLanguageIds ?? undefined
+      }
+    }
+
+    return await this.prismaService.video.findMany({
+      where: videoWhere,
+      skip: offset,
+      take: limit
     })
   }
 
