@@ -105,6 +105,12 @@
         "script": "apps/api-videos/prisma/seed.ts",
         "tsConfig": "apps/api-videos/tsconfig.app.json"
       }
+    },
+    "prisma-reset": {
+      "executor": "@nx-tools/nx-prisma:seed",
+      "options": {
+        "schema": "apps/api-videos/prisma/schema.prisma"
+      }
     }
   },
   "tags": []

@@ -113,8 +113,12 @@ function getIteration(slug: string): string {
   return slug
 }
 
+function createCoreSlug(title: string): string {
+  return slugify(title, { lower: true, remove: /[^a-zA-Z\d\s:]/g })
+}
+
 function getSeoSlug(title: string): string {
-  const slug = slugify(title, { lower: true, remove: /[^a-zA-Z\d\s:]/g })
+  const slug = createCoreSlug(title)
   const newSlug = getIteration(slug)
   usedTitles.push(newSlug)
   return newSlug
@@ -181,12 +185,8 @@ async function digestContent(
       languageId_videoId_value: {
         languageId: metadataLanguageId,
         videoId: mediaComponent.mediaComponentId,
-        value: slugify(mediaComponent.title, {
-          lower: true,
-          remove: /[^a-zA-Z\d\s:]/g
-        })
-      },
-      value: mediaComponent.title
+        value: createCoreSlug(mediaComponent.title)
+      }
     },
     create: {
       languageId: metadataLanguageId,
@@ -311,31 +311,28 @@ async function digestMediaComponentLanguage(
         )
       }
     })
+    return
   }
+  await prisma.videoVariant.upsert({
+    where: {
+      id: mediaComponentLanguage.refId
+    },
+    create: {
+      id: mediaComponentLanguage.refId,
+      videoId: mediaComponent.mediaComponentId,
+      hls: mediaComponentLanguage.streamingUrls.hls[0].url,
+      languageId: mediaComponentLanguage.languageId.toString(),
+      duration: Math.round(mediaComponentLanguage.lengthInMilliseconds * 0.001)
+    },
+    update: {
+      hls: mediaComponentLanguage.streamingUrls.hls[0].url,
+      languageId: mediaComponentLanguage.languageId.toString(),
+      duration: Math.round(mediaComponentLanguage.lengthInMilliseconds * 0.001)
+    }
+  })
   for (const [key, value] of Object.entries(
     mediaComponentLanguage.downloadUrls
   )) {
-    await prisma.videoVariant.upsert({
-      where: {
-        id: mediaComponentLanguage.refId
-      },
-      create: {
-        id: mediaComponentLanguage.refId,
-        videoId: mediaComponent.mediaComponentId,
-        hls: mediaComponentLanguage.streamingUrls.hls[0].url,
-        languageId: mediaComponentLanguage.languageId.toString(),
-        duration: Math.round(
-          mediaComponentLanguage.lengthInMilliseconds * 0.001
-        )
-      },
-      update: {
-        hls: mediaComponentLanguage.streamingUrls.hls[0].url,
-        languageId: mediaComponentLanguage.languageId.toString(),
-        duration: Math.round(
-          mediaComponentLanguage.lengthInMilliseconds * 0.001
-        )
-      }
-    })
     await prisma.videoVariantDownload.upsert({
       where: {
         videoVariantId_quality: {
@@ -370,8 +367,7 @@ async function digestMediaComponentLanguage(
         primary: subtitle.languageId === mediaComponentLanguage.languageId
       },
       update: {
-        value: subtitle.url,
-        primary: subtitle.languageId === mediaComponentLanguage.languageId
+        value: subtitle.url
       }
     })
   }
@@ -531,9 +527,8 @@ async function digestSeriesContainer(
       languageId_videoId_value: {
         languageId: metadataLanguageId,
         videoId: mediaComponent.mediaComponentId,
-        value: mediaComponent.title
-      },
-      value: mediaComponent.title
+        value: createCoreSlug(mediaComponent.title)
+      }
     },
     create: {
       languageId: metadataLanguageId,

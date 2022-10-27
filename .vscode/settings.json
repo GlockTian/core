@@ -25,9 +25,9 @@
       "previewLimit": 50,
       "server": "db",
       "port": 5432,
-      "name": "Container database",
       "driver": "PostgreSQL",
-      "database": "users",
+      "name": "languages",
+      "database": "languages",
       "username": "postgres",
       "password": "postgres"
     },
@@ -36,8 +36,18 @@
       "server": "db",
       "port": 5432,
       "driver": "PostgreSQL",
-      "name": "languages",
-      "database": "languages",
+      "name": "videos",
+      "database": "videos",
+      "username": "postgres",
+      "password": "postgres"
+    },
+    {
+      "previewLimit": 50,
+      "server": "db",
+      "port": 5432,
+      "name": "users",
+      "driver": "PostgreSQL",
+      "database": "users",
       "username": "postgres",
       "password": "postgres"
     }

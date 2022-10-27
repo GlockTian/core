@@ -33,7 +33,6 @@ model Video {
   episodeIds          String[]
   variants            VideoVariant[]
   tags                VideoTag[]
-  playlistId          String?
 }
 
 model VideoTitleTranslation {
@@ -135,11 +134,11 @@ model VideoVariant {
 }
 
 model VideoVariantSubtitleTranslation {
-  languageId    String
-  value         String  
-  primary       Boolean   @default(false)
-  videoVariant     VideoVariant  @relation(fields: [videoVariantId], references: [id])
-  videoVariantId String
+  languageId      String
+  value           String  
+  primary         Boolean       @default(false)
+  videoVariant    VideoVariant  @relation(fields: [videoVariantId], references: [id])
+  videoVariantId  String
   @@id([languageId, videoVariantId])
 }
 
