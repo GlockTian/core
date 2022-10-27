@@ -10,7 +10,7 @@ import {
   Parent
 } from '@nestjs/graphql'
 import { PrismaService } from '../../lib/prisma.service'
-import { Video, VideoType } from '.prisma/api-videos-client'
+import { Video, VideoType, PrismaClient } from '.prisma/api-videos-client'
 
 export enum IdType {
   databaseId = 'databaseId',
@@ -43,26 +43,25 @@ export class VideoResolver {
     const variantLanguageId = info.fieldNodes[0].selectionSet.selections
       .find(({ name }) => name.value === 'variant')
       ?.arguments.find(({ name }) => name.value === 'languageId')?.value?.value
-    return await this.prismaService.video.findMany({
-      where: {
-        playlistId,
-        idType,
-        title: { some: { value: where?.title ?? undefined } },
-        tagId: where?.tagId ?? undefined
-      }
-    })
 
-    filterEpisodes({
-      playlistId,
-      idType,
-      title: where?.title ?? undefined,
+    const videoWhere = {
+      id: idType === IdType.databaseId ? playlistId : undefined,
+      slug:
+        idType === IdType.slug ? { some: { value: playlistId } } : undefined,
       tagId: where?.tagId ?? undefined,
-      availableVariantLanguageIds:
-        where?.availableVariantLanguageIds ?? undefined,
+      title:
+        where?.title == null ? undefined : { some: { value: where.title } },
       variantLanguageId,
       types: where?.types ?? undefined,
-      offset,
-      limit
+      variantLanguageIds: {
+        in: where?.availableVariantLanguageIds ?? undefined
+      }
+    }
+
+    return await this.prismaService.video.findMany({
+      where: videoWhere,
+      take: limit,
+      skip: offset
     })
   }
 

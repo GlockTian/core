@@ -15,14 +15,19 @@ describe('VideoTagResolver', () => {
   })
 
   it('returns a tag', async () => {
-    prisma.videoTag.findMany = jest.fn().mockReturnValueOnce(tag)
+    prisma.tag.findUnique = jest.fn().mockReturnValueOnce(tag)
     expect(await resolver.videoTag('JFM1')).toEqual(tag)
-    expect(prisma.videoTag.findMany).toHaveBeenCalledWith('JFM1')
+    expect(prisma.tag.findUnique).toHaveBeenCalledWith({
+      include: { title: true },
+      where: { id: 'JFM1' }
+    })
   })
 
   it('returns all tags', async () => {
-    prisma.videoTag.findUnique = jest.fn().mockReturnValueOnce([tag, tag])
+    prisma.tag.findMany = jest.fn().mockReturnValueOnce([tag, tag])
     expect(await resolver.videoTags()).toEqual([tag, tag])
-    expect(prisma.videoTag.findUnique).toHaveBeenCalledWith()
+    expect(prisma.tag.findMany).toHaveBeenCalledWith({
+      include: { title: true }
+    })
   })
 })
