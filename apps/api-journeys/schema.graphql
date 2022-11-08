@@ -1,0 +1,1729 @@
+"""DateTime custom scalar"""
+scalar DateTime
+
+enum ThemeMode {
+  dark
+  light
+}
+
+enum ThemeName {
+  base
+}
+
+interface Action {
+  parentBlockId: ID!
+  gtmEventName: String
+}
+
+"""
+NavigateAction is an Action that navigates to the nextBlockId field set on the
+closest ancestor StepBlock.
+"""
+type NavigateAction implements Action {
+  parentBlockId: ID!
+  gtmEventName: String
+}
+
+type NavigateToBlockAction implements Action {
+  parentBlockId: ID!
+  gtmEventName: String
+  blockId: String!
+}
+
+type NavigateToJourneyAction implements Action {
+  parentBlockId: ID!
+  gtmEventName: String
+  journeyId: String!
+  journey: Journey
+}
+
+type LinkAction implements Action {
+  parentBlockId: ID!
+  gtmEventName: String
+  url: String!
+  target: String
+}
+
+input NavigateActionInput {
+  gtmEventName: String
+}
+
+input NavigateToBlockActionInput {
+  gtmEventName: String
+  blockId: String!
+}
+
+input NavigateToJourneyActionInput {
+  gtmEventName: String
+  journeyId: String!
+}
+
+input LinkActionInput {
+  gtmEventName: String
+  url: String!
+  target: String
+}
+
+interface Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+}
+
+type Journey @key(fields: "id") {
+  blocks: [Block!]
+  primaryImageBlock: ImageBlock
+  id: ID!
+  title: String!
+  language: Language!
+  themeMode: ThemeMode!
+  themeName: ThemeName!
+  description: String
+  slug: String!
+  archivedAt: DateTime
+  deletedAt: DateTime
+  publishedAt: DateTime
+  trashedAt: DateTime
+  featuredAt: DateTime
+  createdAt: DateTime!
+  status: JourneyStatus!
+  seoTitle: String
+  seoDescription: String
+  template: Boolean
+  userJourneys: [UserJourney!]
+}
+
+enum ButtonVariant {
+  text
+  contained
+}
+
+enum ButtonColor {
+  primary
+  secondary
+  error
+  inherit
+}
+
+enum ButtonSize {
+  small
+  medium
+  large
+}
+
+type ButtonBlock implements Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+  label: String!
+  variant: ButtonVariant
+  color: ButtonColor
+  size: ButtonSize
+  startIconId: ID
+  endIconId: ID
+  action: Action
+}
+
+input ButtonBlockCreateInput {
+  id: ID
+  journeyId: ID!
+  parentBlockId: ID!
+  label: String!
+  variant: ButtonVariant
+  color: ButtonColor
+  size: ButtonSize
+}
+
+input ButtonBlockUpdateInput {
+  parentBlockId: ID
+  label: String
+  variant: ButtonVariant
+  color: ButtonColor
+  size: ButtonSize
+  startIconId: ID
+  endIconId: ID
+}
+
+type CardBlock implements Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+
+  """backgroundColor should be a HEX color value e.g #FFFFFF for white."""
+  backgroundColor: String
+
+  """
+  coverBlockId is present if a child block should be used as a cover.
+  This child block should not be rendered normally, instead it should be used
+  as a background. Blocks are often of type ImageBlock or VideoBlock.
+  """
+  coverBlockId: ID
+
+  """
+  fullscreen should control how the coverBlock is displayed. When fullscreen
+  is set to true the coverBlock Image should be displayed as a blur in the
+  background.
+  """
+  fullscreen: Boolean!
+
+  """
+  themeMode can override journey themeMode. If nothing is set then use
+  themeMode from journey
+  """
+  themeMode: ThemeMode
+
+  """
+  themeName can override journey themeName. If nothing is set then use
+  themeName from journey
+  """
+  themeName: ThemeName
+}
+
+input CardBlockCreateInput {
+  id: ID
+  journeyId: ID!
+  parentBlockId: ID!
+  backgroundColor: String
+  fullscreen: Boolean
+  themeMode: ThemeMode
+  themeName: ThemeName
+}
+
+input CardBlockUpdateInput {
+  parentBlockId: ID
+  backgroundColor: String
+  fullscreen: Boolean
+  themeMode: ThemeMode
+  themeName: ThemeName
+}
+
+enum GridDirection {
+  columnReverse
+  column
+  row
+  rowReverse
+}
+
+enum GridJustifyContent {
+  flexStart
+  flexEnd
+  center
+}
+
+enum GridAlignItems {
+  baseline
+  flexStart
+  flexEnd
+  center
+}
+
+type GridContainerBlock implements Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+  spacing: Int!
+  direction: GridDirection!
+  justifyContent: GridJustifyContent!
+  alignItems: GridAlignItems!
+}
+
+type GridItemBlock implements Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+  xl: Int!
+  lg: Int!
+  sm: Int!
+}
+
+"""IconName is equivalent to the icons found in @mui/icons-material"""
+enum IconName {
+  PlayArrowRounded
+  TranslateRounded
+  CheckCircleRounded
+  RadioButtonUncheckedRounded
+  FormatQuoteRounded
+  LockOpenRounded
+  ArrowForwardRounded
+  ArrowBackRounded
+  ChatBubbleOutlineRounded
+  LiveTvRounded
+  MenuBookRounded
+  ChevronRightRounded
+  ChevronLeftRounded
+  BeenhereRounded
+  SendRounded
+  SubscriptionsRounded
+  ContactSupportRounded
+}
+
+enum IconColor {
+  primary
+  secondary
+  action
+  error
+  disabled
+  inherit
+}
+
+enum IconSize {
+  sm
+  md
+  lg
+  xl
+  inherit
+}
+
+type IconBlock implements Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+  name: IconName
+  color: IconColor
+  size: IconSize
+}
+
+input IconBlockCreateInput {
+  """
+  ID should be unique Response UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  parentBlockId: ID!
+  journeyId: ID!
+  name: IconName
+  color: IconColor
+  size: IconSize
+}
+
+input IconBlockUpdateInput {
+  name: IconName
+  color: IconColor
+  size: IconSize
+}
+
+type ImageBlock implements Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+  src: String
+  width: Int!
+  height: Int!
+  alt: String!
+
+  """
+  blurhash is a compact representation of a placeholder for an image.
+  Find a frontend implementation at https://github.com/woltapp/blurhash
+  """
+  blurhash: String!
+}
+
+input ImageBlockCreateInput {
+  """
+  ID should be unique Response UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  parentBlockId: ID!
+  journeyId: ID!
+  src: String
+  alt: String!
+  blurhash: String
+
+  """
+  True if the coverBlockId in a parent block should be set to this block's id.
+  """
+  isCover: Boolean
+}
+
+input ImageBlockUpdateInput {
+  parentBlockId: ID
+  src: String
+  alt: String
+}
+
+type RadioOptionBlock implements Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+  label: String!
+  action: Action
+}
+
+type RadioQuestionBlock implements Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+}
+
+input RadioOptionBlockCreateInput {
+  id: ID
+  journeyId: ID!
+  parentBlockId: ID!
+  label: String!
+}
+
+input RadioQuestionBlockCreateInput {
+  id: ID
+  journeyId: ID!
+  parentBlockId: ID!
+}
+
+input RadioOptionBlockUpdateInput {
+  parentBlockId: ID
+  label: String
+}
+
+type SignUpBlock implements Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+  action: Action
+  submitIconId: ID
+  submitLabel: String
+}
+
+input SignUpBlockCreateInput {
+  id: ID
+  journeyId: ID!
+  parentBlockId: ID!
+  submitLabel: String!
+}
+
+input SignUpBlockUpdateInput {
+  parentBlockId: ID
+  submitIconId: ID
+  submitLabel: String
+}
+
+type StepBlock implements Block {
+  id: ID!
+  journeyId: ID!
+
+  """
+  nextBlockId contains the preferred block to navigate to when a
+  NavigateAction occurs or if the user manually tries to advance to the next
+  step. If no nextBlockId is set it will automatically navigate to the next
+  step in the journey based on parentOrder.
+  """
+  nextBlockId: ID
+
+  """
+  locked will be set to true if the user should not be able to manually
+  advance to the next step.
+  """
+  locked: Boolean!
+  parentBlockId: ID
+  parentOrder: Int
+}
+
+input StepBlockCreateInput {
+  id: ID
+  journeyId: ID!
+  nextBlockId: ID
+  locked: Boolean
+}
+
+input StepBlockUpdateInput {
+  nextBlockId: ID
+  locked: Boolean
+}
+
+type TextResponseBlock implements Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+  label: String!
+  hint: String
+  minRows: Int
+  action: Action
+  submitIconId: ID
+  submitLabel: String
+}
+
+input TextResponseBlockCreateInput {
+  id: ID
+  journeyId: ID!
+  parentBlockId: ID!
+  label: String!
+  submitLabel: String!
+}
+
+input TextResponseBlockUpdateInput {
+  parentBlockId: ID
+  label: String
+  hint: String
+  minRows: Int
+  submitIconId: ID
+  submitLabel: String
+}
+
+enum TypographyVariant {
+  h1
+  h2
+  h3
+  h4
+  h5
+  h6
+  subtitle1
+  subtitle2
+  body1
+  body2
+  caption
+  overline
+}
+
+enum TypographyColor {
+  primary
+  secondary
+  error
+}
+
+enum TypographyAlign {
+  left
+  center
+  right
+}
+
+type TypographyBlock implements Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+  content: String!
+  variant: TypographyVariant
+  color: TypographyColor
+  align: TypographyAlign
+}
+
+input TypographyBlockCreateInput {
+  id: ID
+  journeyId: ID!
+  parentBlockId: ID!
+  content: String!
+  variant: TypographyVariant
+  color: TypographyColor
+  align: TypographyAlign
+}
+
+input TypographyBlockUpdateInput {
+  parentBlockId: ID
+  content: String
+  variant: TypographyVariant
+  color: TypographyColor
+  align: TypographyAlign
+}
+
+enum VideoBlockSource {
+  internal
+  youTube
+}
+
+type VideoBlock implements Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+
+  """startAt dictates at which point of time the video should start playing"""
+  startAt: Int
+
+  """endAt dictates at which point of time the video should end"""
+  endAt: Int
+  muted: Boolean
+  autoplay: Boolean
+
+  """
+  posterBlockId is present if a child block should be used as a poster.
+  This child block should not be rendered normally, instead it should be used
+  as the video poster. PosterBlock should be of type ImageBlock.
+  """
+  posterBlockId: ID
+  fullsize: Boolean
+
+  """
+  internal source videos: video is only populated when videoID and
+  videoVariantLanguageId are present
+  """
+  video: Video
+
+  """
+  internal source videos: videoId and videoVariantLanguageId both need to be set
+  to select a video.
+  For other sources only videoId needs to be set.
+  """
+  videoId: ID
+
+  """
+  internal source videos: videoId and videoVariantLanguageId both need to be set
+  to select a video.
+  For other sources only videoId needs to be set.
+  """
+  videoVariantLanguageId: ID
+
+  """
+  internal source: videoId, videoVariantLanguageId, and video present
+  youTube source: videoId, title, description, and duration present
+  """
+  source: VideoBlockSource!
+
+  """
+  internal source videos: this field is not populated and instead only present
+  in the video field.
+  For other sources this is automatically populated.
+  """
+  title: String
+
+  """
+  internal source videos: this field is not populated and instead only present
+  in the video field
+  For other sources this is automatically populated.
+  """
+  description: String
+
+  """
+  internal source videos: this field is not populated and instead only present
+  in the video field
+  For other sources this is automatically populated.
+  """
+  image: String
+
+  """
+  internal source videos: this field is not populated and instead only present
+  in the video field
+  For other sources this is automatically populated.
+  duration in seconds.
+  """
+  duration: Int
+
+  """action that should be performed when the video ends"""
+  action: Action
+}
+
+input VideoBlockCreateInput {
+  id: ID
+  journeyId: ID!
+  parentBlockId: ID!
+
+  """startAt dictates at which point of time the video should start playing"""
+  startAt: Int
+
+  """endAt dictates at which point of time the video should end"""
+  endAt: Int
+  description: String
+  muted: Boolean
+  autoplay: Boolean
+
+  """
+  internal source videos: videoId and videoVariantLanguageId both need to be set
+  to select a video.
+  For other sources only videoId needs to be set.
+  """
+  videoId: ID
+
+  """
+  internal source videos: videoId and videoVariantLanguageId both need to be set
+  to select a video.
+  For other sources only videoId needs to be set.
+  """
+  videoVariantLanguageId: ID
+
+  """
+  internal source: videoId and videoVariantLanguageId required
+  youTube source: videoId required
+  """
+  source: VideoBlockSource
+
+  """
+  posterBlockId is present if a child block should be used as a poster.
+  This child block should not be rendered normally, instead it should be used
+  as the video poster. PosterBlock should be of type ImageBlock.
+  """
+  posterBlockId: ID
+  fullsize: Boolean
+
+  """
+  True if the coverBlockId in a parent block should be set to this block's id.
+  """
+  isCover: Boolean
+}
+
+input VideoBlockUpdateInput {
+  """startAt dictates at which point of time the video should start playing"""
+  startAt: Int
+
+  """endAt dictates at which point of time the video should end"""
+  endAt: Int
+  muted: Boolean
+  autoplay: Boolean
+
+  """
+  internal source videos: videoId and videoVariantLanguageId both need to be set
+  to select a video.
+  For other sources only videoId needs to be set.
+  """
+  videoId: ID
+
+  """
+  internal source videos: videoId and videoVariantLanguageId both need to be set
+  to select a video.
+  For other sources only videoId needs to be set.
+  """
+  videoVariantLanguageId: ID
+
+  """
+  internal source: videoId and videoVariantLanguageId required
+  youTube source: videoId required
+  """
+  source: VideoBlockSource
+
+  """
+  posterBlockId is present if a child block should be used as a poster.
+  This child block should not be rendered normally, instead it should be used
+  as the video poster. PosterBlock should be of type ImageBlock.
+  """
+  posterBlockId: ID
+  fullsize: Boolean
+}
+
+"""
+VideoTriggerBlock is a block that indicates the video to navigate
+to the next block at the designated time.
+"""
+type VideoTriggerBlock implements Block {
+  id: ID!
+  journeyId: ID!
+  parentBlockId: ID
+  parentOrder: Int
+
+  """
+  triggerStart sets the time as to when a video navigates to the next block,
+  this is the number of seconds since the start of the video
+  """
+  triggerStart: Int!
+  action: Action!
+}
+
+input ButtonClickEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+
+  """id of the parent stepBlock"""
+  stepId: ID
+
+  """stepName of the parent stepBlock"""
+  label: String
+
+  """label of the button"""
+  value: String
+}
+
+type ButtonClickEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the buttonBlock belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """stepName of the parent stepBlock"""
+  label: String
+
+  """label of the button"""
+  value: String
+}
+
+enum MessagePlatform {
+  facebook
+  telegram
+  whatsApp
+  instagram
+  viber
+  vk
+  snapchat
+  skype
+  line
+  tikTok
+}
+
+input ChatOpenEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+
+  """id of the parent stepBlock"""
+  stepId: ID
+
+  """messagePlatform of the link used for chat"""
+  value: MessagePlatform
+}
+
+type ChatOpenEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the buttonBlock belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """null for ChatOpenEvent"""
+  label: String
+
+  """messagePlatform of the link used for chat"""
+  value: String
+
+  """
+  messagePlatform of the link used for chat (based on the messagePlatform in the value field)
+  """
+  messagePlatform: MessagePlatform
+}
+
+interface Event {
+  id: ID!
+  journeyId: ID!
+  createdAt: DateTime!
+  label: String
+  value: String
+}
+
+input JourneyViewEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  journeyId: ID!
+
+  """title of the journey being viewed"""
+  label: String
+
+  """languageId of the journey being viewed"""
+  value: ID
+}
+
+type JourneyViewEvent implements Event {
+  id: ID!
+
+  """ID of the journey being viewed"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """title of the journey being viewed"""
+  label: String
+
+  """languageId of the journey being viewed"""
+  value: String
+
+  """
+  language of the journey being viewed (based on the ID in the value field)
+  """
+  language: Language
+}
+
+input RadioQuestionSubmissionEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+  radioOptionBlockId: ID!
+
+  """id of the parent stepBlock"""
+  stepId: ID
+
+  """stepName of the parent stepBlock"""
+  label: String
+
+  """label of the selected radioOption block"""
+  value: String
+}
+
+type RadioQuestionSubmissionEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the radioQuestionBlock belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """stepName of the parent stepBlock"""
+  label: String
+
+  """label of the selected radioOptionBlock"""
+  value: String
+}
+
+input SignUpSubmissionEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+
+  """id of the parent stepBlock"""
+  stepId: ID
+
+  """name from the signUpBlock form"""
+  name: String!
+
+  """email from the signUpBlock form"""
+  email: String!
+}
+
+type SignUpSubmissionEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the block belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """null for signUpSubmissionEvent"""
+  label: String
+
+  """name from the signUpBlock form"""
+  value: String
+
+  """email from the signUpBlock form"""
+  email: String
+}
+
+input StepViewEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+
+  """stepName of the stepBlock"""
+  value: String
+}
+
+type StepViewEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the stepBlock belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """null for stepViewEvent"""
+  label: String
+
+  """stepName of the stepBlock"""
+  value: String
+}
+
+input StepNextEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+
+  """id of the mext stepBlock"""
+  nextStepId: ID!
+
+  """stepName of the stepBlock"""
+  label: String
+
+  """stepName of the next stepBlock"""
+  value: String
+}
+
+type StepNextEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the stepBlock belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """stepName of the stepBlock"""
+  label: String
+
+  """stepName of the next stepBlock"""
+  value: String
+}
+
+input TextResponseSubmissionEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+
+  """id of the parent stepBlock"""
+  stepId: ID
+
+  """stepName of the parent stepBlock"""
+  label: String
+
+  """response from the TextResponseBlock form"""
+  value: String!
+}
+
+type TextResponseSubmissionEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the buttonBlock belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """stepName of the parent stepBlock"""
+  label: String
+
+  """response from the TextResponseBlock form"""
+  value: String
+}
+
+input VideoStartEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+
+  """id of the parent stepBlock"""
+  stepId: ID
+
+  """duration of the video played when the VideoStartEvent is triggered"""
+  position: Float
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: VideoBlockSource
+}
+
+type VideoStartEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the videoBlock belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: String
+
+  """duration of the video played when the VideoStartEvent is triggered"""
+  position: Float
+
+  """source of the video (based on the source in the value field)"""
+  source: VideoBlockSource
+}
+
+input VideoPlayEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+
+  """id of the parent stepBlock"""
+  stepId: ID
+
+  """duration of the video played when the VideoPlayEvent is triggered"""
+  position: Float
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: VideoBlockSource
+}
+
+type VideoPlayEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the videoBlock belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: String
+
+  """duration of the video played when the VideoPlayEvent is triggered"""
+  position: Float
+
+  """source of the video (based on the source in the value field)"""
+  source: VideoBlockSource
+}
+
+input VideoPauseEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+
+  """id of the parent stepBlock"""
+  stepId: ID
+
+  """duration of the video played when the VideoPauseEvent is triggered"""
+  position: Float
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: VideoBlockSource
+}
+
+type VideoPauseEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the videoBlock belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: String
+
+  """duration of the video played when the VideoPauseEvent is triggered"""
+  position: Float
+
+  """source of the video (based on the source in the value field)"""
+  source: VideoBlockSource
+}
+
+input VideoCompleteEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+
+  """id of the parent stepBlock"""
+  stepId: ID
+
+  """duration of the video played when the VideoCompleteEvent is triggered"""
+  position: Float
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: VideoBlockSource
+}
+
+type VideoCompleteEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the videoBlock belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: String
+
+  """duration of the video played when the VideoCompleteEvent is triggered"""
+  position: Float
+
+  """source of the video (based on the source in the value field)"""
+  source: VideoBlockSource
+}
+
+input VideoExpandEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+
+  """id of the parent stepBlock"""
+  stepId: ID
+
+  """duration of the video played when the VideoExpandEvent is triggered"""
+  position: Float
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: VideoBlockSource
+}
+
+type VideoExpandEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the videoBlock belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: String
+
+  """duration of the video played when the VideoExpandEvent is triggered"""
+  position: Float
+
+  """source of the video (based on the source in the value field)"""
+  source: VideoBlockSource
+}
+
+input VideoCollapseEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+
+  """id of the parent stepBlock"""
+  stepId: ID
+
+  """duration of the video played when the VideoCollapseEvent is triggered"""
+  position: Float
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: VideoBlockSource
+}
+
+type VideoCollapseEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the videoBlock belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: String
+
+  """duration of the video played when the VideoCollapseEvent is triggered"""
+  position: Float
+
+  """source of the video (based on the source in the value field)"""
+  source: VideoBlockSource
+}
+
+input VideoProgressEventCreateInput {
+  """
+  ID should be unique Event UUID (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  blockId: ID!
+
+  """id of the parent stepBlock"""
+  stepId: ID
+
+  """duration of the video played when the VideoProgressEvent is triggered"""
+  position: Float
+
+  """
+  progress is a integer indicating the precentage completion from the startAt to the endAt times of the videoBlock
+  """
+  progress: Int!
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: VideoBlockSource
+}
+
+type VideoProgressEvent implements Event {
+  id: ID!
+
+  """ID of the journey that the videoBlock belongs to"""
+  journeyId: ID!
+
+  """time event was created"""
+  createdAt: DateTime!
+
+  """title of the video"""
+  label: String
+
+  """source of the video"""
+  value: String
+
+  """duration of the video played when the VideoProgressEvent is triggered"""
+  position: Float
+
+  """source of the video (based on the source in the value field)"""
+  source: VideoBlockSource
+
+  """
+  progress is a integer indicating the precentage completion from the startAt to the endAt times of the videoBlock
+  """
+  progress: Int!
+}
+
+enum IdType {
+  databaseId
+  slug
+}
+
+enum JourneyStatus {
+  archived
+  deleted
+  draft
+  published
+  trashed
+}
+
+input JourneysFilter {
+  featured: Boolean
+  template: Boolean
+}
+
+enum JourneysReportType {
+  multipleFull
+  multipleSummary
+  singleFull
+  singleSummary
+}
+
+type PowerBiEmbed {
+  """The report ID"""
+  reportId: String!
+
+  """The name of the report"""
+  reportName: String!
+
+  """The embed URL of the report"""
+  embedUrl: String!
+
+  """The embed token"""
+  accessToken: String!
+
+  """The date and time (UTC) of token expiration"""
+  expiration: String!
+}
+
+input JourneyCreateInput {
+  """
+  ID should be unique Response UUID
+  (Provided for optimistic mutation result matching)
+  """
+  id: ID
+  title: String!
+  languageId: String!
+  themeMode: ThemeMode
+  themeName: ThemeName
+  description: String
+
+  """
+  Slug should be unique amongst all journeys
+  (server will throw BAD_USER_INPUT error if not)
+  If not required will use title formatted with kebab-case
+  If the generated slug is not unique the uuid will be placed
+  at the end of the slug guaranteeing uniqueness
+  """
+  slug: String
+}
+
+input JourneyUpdateInput {
+  title: String
+  languageId: String
+  themeMode: ThemeMode
+  themeName: ThemeName
+  description: String
+  primaryImageBlockId: ID
+  slug: String
+  seoTitle: String
+  seoDescription: String
+}
+
+type UserJourney @key(fields: "id") {
+  journey: Journey
+  id: ID!
+  userId: ID!
+  journeyId: ID!
+  role: UserJourneyRole!
+  user: User
+}
+
+input JourneyTemplateInput {
+  template: Boolean
+}
+
+enum UserJourneyRole {
+  inviteRequested
+  editor
+  owner
+}
+
+type UserRole @key(fields: "id") {
+  id: ID!
+  userId: ID!
+  roles: [Role!]
+}
+
+enum Role {
+  """
+  User can create templates and
+  add them to template library
+  """
+  publisher
+}
+
+type Browser {
+  name: String
+  version: String
+}
+
+enum DeviceType {
+  console
+  mobile
+  tablet
+  smarttv
+  wearable
+  embedded
+}
+
+type Device {
+  model: String
+  type: DeviceType
+  vendor: String
+}
+
+type OperatingSystem {
+  name: String
+  version: String
+}
+
+"""These types are a subset provided by the @types/ua-parser-js library."""
+type UserAgent {
+  browser: Browser!
+  device: Device!
+  os: OperatingSystem!
+}
+
+"""
+The status of a visitor according to team members interacting with the
+visitor admin interface. This enum should map to an emoji when displayed
+(names here match Apple's emoji name)
+"""
+enum VisitorStatus {
+  star
+  prohibited
+  checkMarkSymbol
+  thumbsUp
+  thumbsDown
+  partyPopper
+  warning
+  robotFace
+  redExclamationMark
+  redQuestionMark
+}
+
+"""A visitor with attributes connected to a team."""
+type Visitor @key(fields: "id") {
+  id: ID!
+
+  """
+  The time when the visitor created their first event on a journey connected
+  to the requested team.
+  """
+  createdAt: DateTime!
+
+  """
+  The last time the visitor called the ButtonClickEvent mutation where the url
+  is in the format of a recognized chat platform.
+  """
+  lastChatStartedAt: DateTime
+
+  """
+  The user agent of the visitor as poulated by the visitor's user-agent string
+  detected in the JourneyViewEventCreate mutation. This field is enriched
+  by data from the ua-parser-js library. If this field is empty it is likely
+  that the JourneyViewEventCreate mutation was not called by the visitor.
+  """
+  userAgent: UserAgent
+
+  """
+  The country code of the visitor as poulated by visitor ip address detected in
+  the JourneyViewEventCreate mutation. This field country code is converted
+  from an IP address by the @maxmind/geoip2-node library. If this field is empty
+  it is likely that the JourneyViewEventCreate mutation was not called by the
+  visitor or that the country was not able to be determined based on the
+  visitor IP address.
+  """
+  countryCode: String
+
+  """
+  The name of the visitor as populated by VisitorUpdate mutation or
+  SignUpEventSubmissionEventCreate mutation.
+  """
+  name: String
+
+  """
+  The email address of the visitor as populated by VisitorUpdate mutation or
+  SignUpEventSubmissionEventCreate mutation.
+  """
+  email: String
+
+  """Status of the visitor as populated by VisitorUpdate mutation."""
+  status: VisitorStatus
+
+  """
+  Message platform the visitor wishes to be connected to us on as populated by
+  VisitorUpdate mutation or ChatOpenEventCreate mutation.
+  """
+  messagePlatform: MessagePlatform
+
+  """
+  ID of the visitor as set by VisitorUpdate mutation. This could be a phone
+  number, user id or other unique identifier provided by the message platform.
+  """
+  messagePlatformId: String
+
+  """Private notes of the visitor as set by VisitorUpdate mutation."""
+  notes: String
+  events: [Event!]!
+}
+
+"""An edge in a connection."""
+type VisitorEdge {
+  """A cursor for use in pagination."""
+  cursor: String!
+
+  """The item at the end of the edge."""
+  node: Visitor!
+}
+
+"""Information about pagination in a connection."""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
+"""A list of visitors connected with a team."""
+type VisitorsConnection {
+  """A list of edges."""
+  edges: [VisitorEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+}
+
+"""
+A list of fields to update a visitor when calling the visitorUpdate mutation
+"""
+input VisitorUpdateInput {
+  """
+  The email address of the visitor (will prevent
+  SignUpEventSubmissionEventCreate mutation from updating this field
+  automatically)
+  """
+  email: String
+
+  """
+  ID of the visitor. This could be a phone number, user id or other unique
+  identifier provided by the message platform.
+  """
+  messagePlatformId: String
+
+  """
+  Message platform the visitor wishes to be connected to us on (will prevent
+  ChatOpenEventCreate mutation from updating this field automatically)
+  """
+  messagePlatform: MessagePlatform
+
+  """
+  The name of the visitor (will prevent SignUpEventSubmissionEventCreate
+  mutation from updating this field automatically)
+  """
+  name: String
+
+  """
+  Private notes relating to the visitor. This information is never made public
+  and only accessible by team members.
+  """
+  notes: String
+
+  """Status of the visitor."""
+  status: VisitorStatus
+}
+
+extend type Mutation {
+  blockDeleteAction(id: ID!, journeyId: ID!): Block!
+  blockUpdateNavigateAction(id: ID!, journeyId: ID!, input: NavigateActionInput!): NavigateAction!
+  blockUpdateNavigateToBlockAction(id: ID!, journeyId: ID!, input: NavigateToBlockActionInput!): NavigateToBlockAction!
+  blockUpdateNavigateToJourneyAction(id: ID!, journeyId: ID!, input: NavigateToJourneyActionInput!): NavigateToJourneyAction!
+  blockUpdateLinkAction(id: ID!, journeyId: ID!, input: LinkActionInput!): LinkAction!
+
+  """blockDelete returns the updated sibling blocks on successful delete"""
+  blockDelete(id: ID!, journeyId: ID!, parentBlockId: ID): [Block!]!
+
+  """
+  blockDuplicate returns the updated block, it's children and sibling blocks on successful duplicate
+  """
+  blockDuplicate(
+    id: ID!
+    journeyId: ID!
+
+    """
+    parentOrder defines the position to add the duplicated block. Negative values defines the position from the end of the array. Positions greater than the length of the array or null parentOrder will add duplicate at end of the array.
+    """
+    parentOrder: Int
+  ): [Block!]!
+  blockOrderUpdate(id: ID!, journeyId: ID!, parentOrder: Int!): [Block!]!
+  buttonBlockCreate(input: ButtonBlockCreateInput!): ButtonBlock!
+  buttonBlockUpdate(id: ID!, journeyId: ID!, input: ButtonBlockUpdateInput!): ButtonBlock
+  cardBlockCreate(input: CardBlockCreateInput!): CardBlock!
+  cardBlockUpdate(id: ID!, journeyId: ID!, input: CardBlockUpdateInput!): CardBlock!
+  iconBlockCreate(input: IconBlockCreateInput!): IconBlock!
+  iconBlockUpdate(id: ID!, journeyId: ID!, input: IconBlockUpdateInput!): IconBlock!
+  imageBlockCreate(input: ImageBlockCreateInput!): ImageBlock!
+  imageBlockUpdate(id: ID!, journeyId: ID!, input: ImageBlockUpdateInput!): ImageBlock!
+  radioOptionBlockCreate(input: RadioOptionBlockCreateInput!): RadioOptionBlock!
+  radioQuestionBlockCreate(input: RadioQuestionBlockCreateInput!): RadioQuestionBlock!
+  radioOptionBlockUpdate(id: ID!, journeyId: ID!, input: RadioOptionBlockUpdateInput!): RadioOptionBlock!
+  radioQuestionBlockUpdate(id: ID!, journeyId: ID!, parentBlockId: ID!): RadioQuestionBlock!
+  signUpBlockCreate(input: SignUpBlockCreateInput!): SignUpBlock!
+  signUpBlockUpdate(id: ID!, journeyId: ID!, input: SignUpBlockUpdateInput!): SignUpBlock
+  stepBlockCreate(input: StepBlockCreateInput!): StepBlock!
+  stepBlockUpdate(id: ID!, journeyId: ID!, input: StepBlockUpdateInput!): StepBlock!
+  textResponseBlockCreate(input: TextResponseBlockCreateInput!): TextResponseBlock!
+  textResponseBlockUpdate(id: ID!, journeyId: ID!, input: TextResponseBlockUpdateInput!): TextResponseBlock
+  typographyBlockCreate(input: TypographyBlockCreateInput!): TypographyBlock!
+  typographyBlockUpdate(id: ID!, journeyId: ID!, input: TypographyBlockUpdateInput!): TypographyBlock!
+  videoBlockCreate(input: VideoBlockCreateInput!): VideoBlock!
+  videoBlockUpdate(id: ID!, journeyId: ID!, input: VideoBlockUpdateInput!): VideoBlock!
+  buttonClickEventCreate(input: ButtonClickEventCreateInput!): ButtonClickEvent!
+  chatOpenEventCreate(input: ChatOpenEventCreateInput!): ChatOpenEvent!
+  journeyViewEventCreate(input: JourneyViewEventCreateInput!): JourneyViewEvent!
+  radioQuestionSubmissionEventCreate(input: RadioQuestionSubmissionEventCreateInput!): RadioQuestionSubmissionEvent!
+  signUpSubmissionEventCreate(input: SignUpSubmissionEventCreateInput!): SignUpSubmissionEvent!
+  stepViewEventCreate(input: StepViewEventCreateInput!): StepViewEvent!
+  stepNextEventCreate(input: StepNextEventCreateInput!): StepNextEvent!
+  textResponseSubmissionEventCreate(input: TextResponseSubmissionEventCreateInput!): TextResponseSubmissionEvent!
+  videoStartEventCreate(input: VideoStartEventCreateInput!): VideoStartEvent!
+  videoPlayEventCreate(input: VideoPlayEventCreateInput!): VideoPlayEvent!
+  videoPauseEventCreate(input: VideoPauseEventCreateInput!): VideoPauseEvent!
+  videoCompleteEventCreate(input: VideoCompleteEventCreateInput!): VideoCompleteEvent!
+  videoExpandEventCreate(input: VideoExpandEventCreateInput!): VideoExpandEvent!
+  videoCollapseEventCreate(input: VideoCollapseEventCreateInput!): VideoCollapseEvent!
+  videoProgressEventCreate(input: VideoProgressEventCreateInput!): VideoProgressEvent!
+  journeyCreate(input: JourneyCreateInput!): Journey!
+  journeyDuplicate(id: ID!): Journey!
+  journeyUpdate(id: ID!, input: JourneyUpdateInput!): Journey!
+
+  """Sets journey status to published"""
+  journeyPublish(id: ID!): Journey
+
+  """Sets journeys statuses to archived"""
+  journeysArchive(ids: [ID!]!): [Journey]
+
+  """Sets journeys statuses to deleted"""
+  journeysDelete(ids: [ID!]!): [Journey]
+
+  """Sets journeys statuses to trashed"""
+  journeysTrash(ids: [ID!]!): [Journey]
+
+  """Sets journeys statuses to last active status"""
+  journeysRestore(ids: [ID!]!): [Journey]
+
+  """Updates template"""
+  journeyTemplate(id: ID!, input: JourneyTemplateInput!): Journey!
+  userJourneyApprove(id: ID!): UserJourney!
+  userJourneyPromote(id: ID!): UserJourney!
+  userJourneyRemove(id: ID!): UserJourney!
+
+  """Removes all userJourneys associated with a journeyId"""
+  userJourneyRemoveAll(id: ID!): [UserJourney!]!
+  userJourneyRequest(journeyId: ID!, idType: IdType): UserJourney!
+
+  """Update a visitor"""
+  visitorUpdate(id: ID!, input: VisitorUpdateInput!): Visitor!
+}
+
+extend type Video @key(fields: "id primaryLanguageId") {
+  id: ID! @external
+  primaryLanguageId: ID! @external
+}
+
+extend type Language @key(fields: "id") {
+  id: ID! @external
+}
+
+extend type Query {
+  adminJourneys(status: [JourneyStatus!], template: Boolean): [Journey!]!
+  adminJourneysReport(reportType: JourneysReportType!): PowerBiEmbed
+  adminJourney(id: ID!, idType: IdType): Journey
+  journeys(where: JourneysFilter): [Journey!]!
+  journey(id: ID!, idType: IdType): Journey
+  getUserRole: UserRole
+
+  """A list of visitors that are connected with a specific team."""
+  visitorsConnection(
+    """Returns the visitor items related to a specific team."""
+    teamId: String!
+
+    """Returns the first n elements from the list."""
+    first: Int
+
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+  ): VisitorsConnection!
+
+  """Get a single visitor"""
+  visitor(id: ID!): Visitor!
+}
+
+extend type User @key(fields: "id") {
+  id: ID! @external
+}

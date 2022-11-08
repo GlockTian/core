@@ -76,21 +76,32 @@ export class VideoResolver {
       .find(({ name }) => name.value === 'variant')
       ?.arguments.find(({ name }) => name.value === 'languageId')?.value?.value
 
-    const videoWhere = {
-      tagId: where?.tagId ?? undefined,
-      title:
-        where?.title == null ? undefined : { some: { value: where.title } },
-      variantLanguageId,
-      types: where?.types ?? undefined,
-      variantLanguageIds: {
-        in: where?.availableVariantLanguageIds ?? undefined
-      }
-    }
-
     return await this.prismaService.video.findMany({
-      where: videoWhere,
+      where: {
+        tagId: where?.tagId ?? undefined,
+        title:
+          where?.title == null ? undefined : { some: { value: where.title } },
+        variantLanguageId,
+        types: where?.types ?? undefined,
+        variantLanguageIds: {
+          in: where?.availableVariantLanguageIds ?? undefined
+        }
+      },
       skip: offset,
       take: limit
+    })
+  }
+
+  @Query()
+  async videosById(@Info() info, @Args('ids') ids: string[]): Promise<Video[]> {
+    const variantLanguageId = info.fieldNodes[0].selectionSet.selections
+      .find(({ name }) => name.value === 'variant')
+      ?.arguments.find(({ name }) => name.value === 'languageId')?.value?.value
+    return await this.prismaService.video.findMany({
+      where: {
+        id: { in: ids },
+        variantLanguageIds: variantLanguageId
+      }
     })
   }
 
