@@ -10,7 +10,7 @@ import {
   Parent
 } from '@nestjs/graphql'
 import { PrismaService } from '../../lib/prisma.service'
-import { Video, VideoType, PrismaClient } from '.prisma/api-videos-client'
+import { Video, VideoType } from '.prisma/api-videos-client'
 
 export enum IdType {
   databaseId = 'databaseId',
@@ -78,14 +78,14 @@ export class VideoResolver {
 
     return await this.prismaService.video.findMany({
       where: {
-        tagId: where?.tagId ?? undefined,
+        // tagId: where?.tagId ?? undefined,
         title:
-          where?.title == null ? undefined : { some: { value: where.title } },
-        variantLanguageId,
-        types: where?.types ?? undefined,
-        variantLanguageIds: {
-          in: where?.availableVariantLanguageIds ?? undefined
-        }
+          where?.title == null ? undefined : { some: { value: where.title } }
+        // variantLanguageId,
+        // types: where?.types ?? undefined
+        // variantLanguageIds: {
+        //   in: where?.availableVariantLanguageIds ?? undefined
+        // }
       },
       skip: offset,
       take: limit
