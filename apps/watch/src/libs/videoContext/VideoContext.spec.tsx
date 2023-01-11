@@ -105,7 +105,6 @@ const chapter1: VideoContentFields = {
     }
   ],
   slug: 'the-beginning',
-  children: [],
   childrenCount: 0
 }
 

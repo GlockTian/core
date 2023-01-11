@@ -62,9 +62,6 @@ export const VIDEO_CONTENT_FIELDS = gql`
       }
     }
     slug
-    children {
-      ...VideoChildFields
-    }
     childrenCount
   }
 `

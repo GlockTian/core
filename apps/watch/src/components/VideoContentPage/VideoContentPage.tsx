@@ -15,10 +15,38 @@ import { DownloadDialog } from '../DownloadDialog'
 import { ShareButton } from '../ShareButton'
 import { VideoCard } from '../VideoCard'
 import { VideosCarousel } from '../VideosCarousel'
+import { VideoChildFields } from '../../../__generated__/VideoChildFields'
 import { DownloadButton } from './DownloadButton'
 import { VideoHero } from './VideoHero'
 import { VideoContent } from './VideoContent/VideoContent'
 import { VideoContentCarousel } from './VideoContentCarousel'
+
+const children = [
+  {
+    id: '2_video-0-0',
+    image:
+      'https://images.unsplash.com/photo-1670140274562-2496ccaa5271?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1887&q=80',
+    title: [{ value: 'video title' }],
+    snippet: [
+      {
+        value: 'video description'
+      }
+    ],
+    children: [
+      {
+        id: 'child.id',
+        slug: 'slug',
+        image: 'image url',
+        imageAlt: [{ value: 'image alt' }],
+        variant: {
+          duration: 1
+        },
+        title: [{ value: 'child title' }]
+      } as unknown as VideoChildFields
+    ],
+    slug: 'video-slug'
+  }
+] as unknown as VideoChildFields[]
 
 // Usually FeatureFilm, ShortFilm, Episode or Segment Videos
 export function VideoContentPage(): ReactElement {
@@ -30,7 +58,6 @@ export function VideoContentPage(): ReactElement {
     imageAlt,
     slug,
     variant,
-    children,
     container,
     label
   } = useVideo()
@@ -134,7 +161,7 @@ export function VideoContentPage(): ReactElement {
                 </Typography>
               </Container>
               <VideosCarousel
-                videos={children}
+                videos={videos[19]}
                 activeVideo={id}
                 renderItem={(props: Parameters<typeof VideoCard>[0]) => {
                   return (

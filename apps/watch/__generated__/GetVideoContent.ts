@@ -104,77 +104,6 @@ export interface GetVideoContent_content_variantLanguagesWithSlug {
   language: GetVideoContent_content_variantLanguagesWithSlug_language | null;
 }
 
-export interface GetVideoContent_content_children_title {
-  __typename: "Translation";
-  value: string;
-}
-
-export interface GetVideoContent_content_children_imageAlt {
-  __typename: "Translation";
-  value: string;
-}
-
-export interface GetVideoContent_content_children_snippet {
-  __typename: "Translation";
-  value: string;
-}
-
-export interface GetVideoContent_content_children_children {
-  __typename: "Video";
-  id: string;
-}
-
-export interface GetVideoContent_content_children_variant_subtitle_language_name {
-  __typename: "Translation";
-  value: string;
-  primary: boolean;
-}
-
-export interface GetVideoContent_content_children_variant_subtitle_language {
-  __typename: "Language";
-  name: GetVideoContent_content_children_variant_subtitle_language_name[];
-  bcp47: string | null;
-  id: string;
-}
-
-export interface GetVideoContent_content_children_variant_subtitle {
-  __typename: "Translation";
-  language: GetVideoContent_content_children_variant_subtitle_language;
-  value: string;
-}
-
-export interface GetVideoContent_content_children_variant {
-  __typename: "VideoVariant";
-  id: string;
-  duration: number;
-  hls: string | null;
-  /**
-   * slug is a permanent link to the video variant.
-   */
-  slug: string;
-  subtitle: GetVideoContent_content_children_variant_subtitle[];
-}
-
-export interface GetVideoContent_content_children {
-  __typename: "Video";
-  id: string;
-  label: VideoLabel;
-  title: GetVideoContent_content_children_title[];
-  image: string | null;
-  imageAlt: GetVideoContent_content_children_imageAlt[];
-  snippet: GetVideoContent_content_children_snippet[];
-  /**
-   * slug is a permanent link to the video.
-   */
-  slug: string;
-  children: GetVideoContent_content_children_children[];
-  variant: GetVideoContent_content_children_variant | null;
-  /**
-   * the number value of the amount of children on a video
-   */
-  childrenCount: number;
-}
-
 export interface GetVideoContent_content {
   __typename: "Video";
   id: string;
@@ -191,7 +120,6 @@ export interface GetVideoContent_content {
    * slug is a permanent link to the video.
    */
   slug: string;
-  children: GetVideoContent_content_children[];
   /**
    * the number value of the amount of children on a video
    */

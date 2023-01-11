@@ -2,10 +2,7 @@ import { ComponentProps } from 'react'
 import { Story, Meta } from '@storybook/react'
 import { screen, userEvent } from '@storybook/testing-library'
 import { noop } from 'lodash'
-import {
-  VideoContentFields,
-  VideoContentFields_children
-} from '../../../__generated__/VideoContentFields'
+import { VideoContentFields } from '../../../__generated__/VideoContentFields'
 import { watchConfig } from '../../libs/storybook'
 import { VideoProvider } from '../../libs/videoContext'
 import { videos } from '../Videos/testData'
@@ -67,7 +64,6 @@ const video: VideoContentFields = {
   },
   description: videos[0].snippet,
   studyQuestions: [],
-  children: [],
   childrenCount: 0
 }
 
@@ -88,8 +84,7 @@ Basic.args = {
   open: true,
   onClose: noop,
   video: {
-    ...video,
-    children: [{ id: '1' }] as unknown as VideoContentFields_children[]
+    ...video
   },
   routes
 }

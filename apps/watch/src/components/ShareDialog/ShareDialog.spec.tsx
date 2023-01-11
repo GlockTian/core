@@ -1,9 +1,6 @@
 import { fireEvent, render, waitFor } from '@testing-library/react'
 import { SnackbarProvider } from 'notistack'
-import {
-  VideoContentFields,
-  VideoContentFields_children
-} from '../../../__generated__/VideoContentFields'
+import { VideoContentFields } from '../../../__generated__/VideoContentFields'
 import { VideoProvider } from '../../libs/videoContext'
 
 import { videos } from '../Videos/testData'
@@ -68,7 +65,6 @@ const video: VideoContentFields = {
   },
   description: videos[0].snippet,
   studyQuestions: [],
-  children: [],
   childrenCount: 0
 }
 
@@ -103,9 +99,6 @@ describe('ShareDialog', () => {
           value={{
             content: {
               ...video,
-              children: [
-                { id: '1' }
-              ] as unknown as VideoContentFields_children[],
               childrenCount: 1
             }
           }}
