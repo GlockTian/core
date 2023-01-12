@@ -24,11 +24,6 @@ export interface GetVideoChildren_video_children_snippet {
   value: string;
 }
 
-export interface GetVideoChildren_video_children_children {
-  __typename: "Video";
-  id: string;
-}
-
 export interface GetVideoChildren_video_children_variant_subtitle_language_name {
   __typename: "Translation";
   value: string;
@@ -72,7 +67,6 @@ export interface GetVideoChildren_video_children {
    * slug is a permanent link to the video.
    */
   slug: string;
-  children: GetVideoChildren_video_children_children[];
   variant: GetVideoChildren_video_children_variant | null;
   /**
    * the number value of the amount of children on a video
