@@ -5,7 +5,9 @@ describe('SeeAllVideos', () => {
   it('should render hardcoded text', () => {
     const { getByText } = render(<SeeAllVideos />)
     expect(getByText('Conversation Starters')).toBeInTheDocument()
-    expect(getByText('+53 Short Evangelical Films')).toBeInTheDocument()
+    expect(
+      getByText('Explore 1000’s of Christian Ministry Videos For Free')
+    ).toBeInTheDocument()
   })
 
   it('button should have correct link', () => {

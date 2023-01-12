@@ -23,7 +23,7 @@ export function SeeAllVideos(): ReactElement {
         spacing={4}
       >
         <Typography variant="h2" color="text.primary">
-          +53 Short Evangelical Films
+          Explore 1000’s of Christian Ministry Videos For Free
         </Typography>
         <>
           <Link href="/videos" passHref>
@@ -34,7 +34,8 @@ export function SeeAllVideos(): ReactElement {
               aria-label="all-videos-button-small"
               sx={{
                 display: { xs: 'flex', lg: 'none' },
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                minWidth: 140
               }}
             >
               See Full Lineup
@@ -48,7 +49,8 @@ export function SeeAllVideos(): ReactElement {
               aria-label="all-videos-button-large"
               sx={{
                 display: { xs: 'none', lg: 'flex' },
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                minWidth: 200
               }}
             >
               See Full Lineup
