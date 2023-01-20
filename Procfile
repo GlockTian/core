@@ -1,3 +1,4 @@
+countries-serve: nx serve api-countries
 journeys-serve: nx serve api-journeys
 journeys-watcher: nx watcher api-journeys
 users-serve: nx serve api-users

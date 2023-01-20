@@ -1,0 +1,112 @@
+{
+  "root": "apps/api-countries",
+  "sourceRoot": "apps/api-countries/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/api-countries",
+        "main": "apps/api-countries/src/main.ts",
+        "tsConfig": "apps/api-countries/tsconfig.app.json",
+        "assets": [
+          "apps/api-countries/src/assets",
+          {
+            "glob": "**/*.graphql",
+            "input": "apps/api-countries/src/app/",
+            "output": "./assets"
+          }
+        ],
+        "generatePackageJson": true
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "apps/api-countries/src/environments/environment.ts",
+              "with": "apps/api-countries/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "api-countries:build",
+        "inspect": false
+      }
+    },
+    "watcher": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "npx ts-node apps/api-countries/src/generate-typings.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/api-countries/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/api-countries"],
+      "options": {
+        "jestConfig": "apps/api-countries/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "generate-graphql": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "rover subgraph introspect http://localhost:4005/graphql > apps/api-countries/schema.graphql"
+          }
+        ]
+      }
+    },
+    "fetch-secrets": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "DOPPLER_TOKEN=$DOPPLER_API_USERS_TOKEN doppler secrets download --no-file --format=env-no-quotes --project api-countries > apps/api-countries/.env"
+          }
+        ]
+      }
+    },
+    "prisma-generate": {
+      "executor": "@nx-tools/nx-prisma:generate",
+      "options": {
+        "schema": "apps/api-countries/prisma/schema.prisma"
+      }
+    },
+    "prisma-migrate": {
+      "executor": "@nx-tools/nx-prisma:migrate",
+      "options": {
+        "schema": "apps/api-countries/prisma/schema.prisma"
+      }
+    },
+    "prisma-rollback": {
+      "executor": "@nx-tools/nx-prisma:rollback",
+      "options": {
+        "schema": "apps/api-countries/prisma/schema.prisma"
+      }
+    },
+    "prisma-seed": {
+      "executor": "@nx-tools/nx-prisma:seed",
+      "options": {
+        "script": "apps/api-countries/prisma/seed.ts",
+        "tsConfig": "apps/api-countries/tsconfig.app.json"
+      }
+    }
+  },
+  "tags": []
+}
