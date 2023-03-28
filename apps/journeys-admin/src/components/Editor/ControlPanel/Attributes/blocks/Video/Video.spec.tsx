@@ -2,6 +2,7 @@ import { render } from '@testing-library/react'
 import type { TreeBlock } from '@core/journeys/ui/block'
 import {
   ActiveFab,
+  ActiveJourneyEditContent,
   ActiveTab,
   useEditor
 } from '@core/journeys/ui/EditorProvider'
@@ -41,6 +42,7 @@ describe('Video', () => {
     description: null,
     duration: null,
     image: null,
+    objectFit: null,
     video: {
       __typename: 'Video',
       id: '2_0-FallingPlates',
@@ -66,7 +68,8 @@ describe('Video', () => {
     steps: [],
     drawerMobileOpen: false,
     activeTab: ActiveTab.Cards,
-    activeFab: ActiveFab.Add
+    activeFab: ActiveFab.Add,
+    journeyEditContentComponent: ActiveJourneyEditContent.Canvas
   }
 
   beforeEach(() => {

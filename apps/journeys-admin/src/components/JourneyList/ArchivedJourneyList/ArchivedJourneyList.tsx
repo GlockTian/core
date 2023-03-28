@@ -7,10 +7,13 @@ import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 import { useSnackbar } from 'notistack'
 import { AuthUser } from 'next-firebase-auth'
+import { JourneyProvider } from '@core/journeys/ui/JourneyProvider'
+import { JourneyFields } from '../../../../__generated__/JourneyFields'
 import { GetArchivedJourneys } from '../../../../__generated__/GetArchivedJourneys'
 import { JourneyCard } from '../JourneyCard'
 import { SortOrder } from '../JourneySort'
 import { sortJourneys } from '../JourneySort/utils/sortJourneys'
+import { DiscoveryJourneys } from '../../DiscoveryJourneys'
 
 export const GET_ARCHIVED_JOURNEYS = gql`
   query GetArchivedJourneys {
@@ -36,6 +39,7 @@ export const GET_ARCHIVED_JOURNEYS = gql`
       userJourneys {
         id
         role
+        openedAt
         user {
           id
           firstName
@@ -188,10 +192,16 @@ export function ArchivedJourneyList({
       {journeys != null && sortedJourneys != null ? (
         <>
           {sortedJourneys.map((journey) => (
-            <JourneyCard key={journey.id} journey={journey} refetch={refetch} />
+            <JourneyProvider
+              key={journey.id}
+              value={{ journey: journey as JourneyFields, admin: true }}
+            >
+              <JourneyCard journey={journey} refetch={refetch} />
+            </JourneyProvider>
           ))}
           {journeys.length > 0 ? (
             <span>
+              <DiscoveryJourneys />
               <Box width="100%" sx={{ textAlign: 'center' }}>
                 <Typography variant="caption">
                   {t(
@@ -219,6 +229,7 @@ export function ArchivedJourneyList({
                   {t('No archived journeys.')}
                 </Typography>
               </Card>
+
               <Box width="100%" sx={{ textAlign: 'center' }}>
                 <Typography variant="caption">
                   {t(

@@ -4,7 +4,7 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/node:build",
+      "executor": "@nrwl/node:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/api-languages",
@@ -40,24 +40,17 @@
         "command": "npx ts-node apps/api-languages/db/seed.ts"
       }
     },
-    "serve-nowatch": {
-      "executor": "@nrwl/node:execute",
+    "serve": {
+      "executor": "@nrwl/node:node",
       "options": {
-        "buildTarget": "api-languages:build"
+        "buildTarget": "api-languages:build",
+        "inspect": false
       }
     },
-    "serve": {
+    "watcher": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "commands": [
-          {
-            "command": "nx serve-nowatch api-languages"
-          },
-          {
-            "command": "npx ts-node apps/api-languages/src/generate-typings.ts"
-          }
-        ],
-        "parallel": true
+        "command": "npx ts-node tools/scripts/generate-typings.ts api-languages"
       }
     },
     "lint": {
@@ -78,21 +71,19 @@
     "generate-graphql": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "commands": [
-          {
-            "command": "rover subgraph introspect http://localhost:4003/graphql > apps/api-languages/schema.graphql"
-          }
-        ]
+        "command": "rover subgraph introspect http://localhost:4003/graphql > apps/api-languages/schema.graphql"
+      }
+    },
+    "subgraph-check": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "rover subgraph check API-GATEWAY-0zuda@current --name api-languages --schema apps/api-languages/schema.graphql"
       }
     },
     "fetch-secrets": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "commands": [
-          {
-            "command": "DOPPLER_TOKEN=$DOPPLER_API_LANGUAGES_TOKEN doppler secrets download --no-file --format=env-no-quotes --project api-languages > apps/api-languages/.env"
-          }
-        ]
+        "command": "DOPPLER_TOKEN=$DOPPLER_API_LANGUAGES_TOKEN doppler secrets download --no-file --format=env-no-quotes --project api-languages > apps/api-languages/.env"
       }
     }
   },

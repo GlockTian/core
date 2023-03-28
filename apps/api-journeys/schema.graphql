@@ -1,4 +1,15 @@
-"""DateTime custom scalar"""
+directive @key(fields: _FieldSet!, resolvable: Boolean = true) repeatable on OBJECT | INTERFACE
+
+directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
+
+directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
+
+directive @external(reason: String) on OBJECT | FIELD_DEFINITION
+
+directive @tag(name: String!) repeatable on FIELD_DEFINITION | OBJECT | INTERFACE | UNION | ARGUMENT_DEFINITION | SCALAR | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
+
+directive @extends on OBJECT | INTERFACE
+
 scalar DateTime
 
 enum ThemeMode {
@@ -64,6 +75,104 @@ input LinkActionInput {
   target: String
 }
 
+extend type Mutation {
+  blockDeleteAction(id: ID!, journeyId: ID!): Block!
+  blockUpdateNavigateAction(id: ID!, journeyId: ID!, input: NavigateActionInput!): NavigateAction!
+  blockUpdateNavigateToBlockAction(id: ID!, journeyId: ID!, input: NavigateToBlockActionInput!): NavigateToBlockAction!
+  blockUpdateNavigateToJourneyAction(id: ID!, journeyId: ID!, input: NavigateToJourneyActionInput!): NavigateToJourneyAction!
+  blockUpdateLinkAction(id: ID!, journeyId: ID!, input: LinkActionInput!): LinkAction!
+
+  """blockDelete returns the updated sibling blocks on successful delete"""
+  blockDelete(id: ID!, journeyId: ID!, parentBlockId: ID): [Block!]!
+
+  """
+  blockDuplicate returns the updated block, it's children and sibling blocks on successful duplicate
+  """
+  blockDuplicate(
+    id: ID!
+    journeyId: ID!
+
+    """
+    parentOrder defines the position to add the duplicated block. Negative values defines the position from the end of the array. Positions greater than the length of the array or null parentOrder will add duplicate at end of the array.
+    """
+    parentOrder: Int
+  ): [Block!]!
+  blockOrderUpdate(id: ID!, journeyId: ID!, parentOrder: Int!): [Block!]!
+  buttonBlockCreate(input: ButtonBlockCreateInput!): ButtonBlock!
+  buttonBlockUpdate(id: ID!, journeyId: ID!, input: ButtonBlockUpdateInput!): ButtonBlock
+  cardBlockCreate(input: CardBlockCreateInput!): CardBlock!
+  cardBlockUpdate(id: ID!, journeyId: ID!, input: CardBlockUpdateInput!): CardBlock!
+  iconBlockCreate(input: IconBlockCreateInput!): IconBlock!
+  iconBlockUpdate(id: ID!, journeyId: ID!, input: IconBlockUpdateInput!): IconBlock!
+  imageBlockCreate(input: ImageBlockCreateInput!): ImageBlock!
+  imageBlockUpdate(id: ID!, journeyId: ID!, input: ImageBlockUpdateInput!): ImageBlock!
+  radioOptionBlockCreate(input: RadioOptionBlockCreateInput!): RadioOptionBlock!
+  radioQuestionBlockCreate(input: RadioQuestionBlockCreateInput!): RadioQuestionBlock!
+  radioOptionBlockUpdate(id: ID!, journeyId: ID!, input: RadioOptionBlockUpdateInput!): RadioOptionBlock!
+  radioQuestionBlockUpdate(id: ID!, journeyId: ID!, parentBlockId: ID!): RadioQuestionBlock!
+  signUpBlockCreate(input: SignUpBlockCreateInput!): SignUpBlock!
+  signUpBlockUpdate(id: ID!, journeyId: ID!, input: SignUpBlockUpdateInput!): SignUpBlock
+  stepBlockCreate(input: StepBlockCreateInput!): StepBlock!
+  stepBlockUpdate(id: ID!, journeyId: ID!, input: StepBlockUpdateInput!): StepBlock!
+  textResponseBlockCreate(input: TextResponseBlockCreateInput!): TextResponseBlock!
+  textResponseBlockUpdate(id: ID!, journeyId: ID!, input: TextResponseBlockUpdateInput!): TextResponseBlock
+  typographyBlockCreate(input: TypographyBlockCreateInput!): TypographyBlock!
+  typographyBlockUpdate(id: ID!, journeyId: ID!, input: TypographyBlockUpdateInput!): TypographyBlock!
+  videoBlockCreate(input: VideoBlockCreateInput!): VideoBlock!
+  videoBlockUpdate(id: ID!, journeyId: ID!, input: VideoBlockUpdateInput!): VideoBlock!
+  buttonClickEventCreate(input: ButtonClickEventCreateInput!): ButtonClickEvent!
+  chatOpenEventCreate(input: ChatOpenEventCreateInput!): ChatOpenEvent!
+  journeyViewEventCreate(input: JourneyViewEventCreateInput!): JourneyViewEvent!
+  radioQuestionSubmissionEventCreate(input: RadioQuestionSubmissionEventCreateInput!): RadioQuestionSubmissionEvent!
+  signUpSubmissionEventCreate(input: SignUpSubmissionEventCreateInput!): SignUpSubmissionEvent!
+  stepViewEventCreate(input: StepViewEventCreateInput!): StepViewEvent!
+  stepNextEventCreate(input: StepNextEventCreateInput!): StepNextEvent!
+  textResponseSubmissionEventCreate(input: TextResponseSubmissionEventCreateInput!): TextResponseSubmissionEvent!
+  videoStartEventCreate(input: VideoStartEventCreateInput!): VideoStartEvent!
+  videoPlayEventCreate(input: VideoPlayEventCreateInput!): VideoPlayEvent!
+  videoPauseEventCreate(input: VideoPauseEventCreateInput!): VideoPauseEvent!
+  videoCompleteEventCreate(input: VideoCompleteEventCreateInput!): VideoCompleteEvent!
+  videoExpandEventCreate(input: VideoExpandEventCreateInput!): VideoExpandEvent!
+  videoCollapseEventCreate(input: VideoCollapseEventCreateInput!): VideoCollapseEvent!
+  videoProgressEventCreate(input: VideoProgressEventCreateInput!): VideoProgressEvent!
+  journeyCreate(input: JourneyCreateInput!): Journey!
+  journeyDuplicate(id: ID!): Journey!
+  journeyUpdate(id: ID!, input: JourneyUpdateInput!): Journey!
+
+  """Sets journey status to published"""
+  journeyPublish(id: ID!): Journey
+
+  """Sets journeys statuses to archived"""
+  journeysArchive(ids: [ID!]!): [Journey]
+
+  """Sets journeys statuses to deleted"""
+  journeysDelete(ids: [ID!]!): [Journey]
+
+  """Sets journeys statuses to trashed"""
+  journeysTrash(ids: [ID!]!): [Journey]
+
+  """Sets journeys statuses to last active status"""
+  journeysRestore(ids: [ID!]!): [Journey]
+
+  """Updates template"""
+  journeyTemplate(id: ID!, input: JourneyTemplateInput!): Journey!
+  journeyProfileCreate: JourneyProfile!
+  userInviteCreate(journeyId: ID!, input: UserInviteCreateInput): UserInvite
+  userInviteRemove(id: ID!, journeyId: ID!): UserInvite!
+  userInviteAcceptAll: [UserInvite!]!
+  userJourneyApprove(id: ID!): UserJourney!
+  userJourneyPromote(id: ID!): UserJourney!
+  userJourneyRemove(id: ID!): UserJourney!
+
+  """Removes all userJourneys associated with a journeyId"""
+  userJourneyRemoveAll(id: ID!): [UserJourney!]!
+  userJourneyRequest(journeyId: ID!, idType: IdType): UserJourney!
+  userJourneyOpen(id: ID!): UserJourney
+
+  """Update a visitor"""
+  visitorUpdate(id: ID!, input: VisitorUpdateInput!): Visitor!
+}
+
 interface Block {
   id: ID!
   journeyId: ID!
@@ -71,7 +180,9 @@ interface Block {
   parentOrder: Int
 }
 
-type Journey @key(fields: "id") {
+type Journey
+  @key(fields: "id")
+{
   blocks: [Block!]
   primaryImageBlock: ImageBlock
   id: ID!
@@ -333,7 +444,13 @@ input ImageBlockCreateInput {
   journeyId: ID!
   src: String
   alt: String!
+
+  """
+  If blurhash, width, & height are provided, the image will skip blurhash processing. Otherwise these values will be calculated.
+  """
   blurhash: String
+  width: Int
+  height: Int
 
   """
   True if the coverBlockId in a parent block should be set to this block's id.
@@ -345,6 +462,13 @@ input ImageBlockUpdateInput {
   parentBlockId: ID
   src: String
   alt: String
+
+  """
+  If blurhash, width, & height are provided, the image will skip blurhash processing. Otherwise these values will be calculated.
+  """
+  blurhash: String
+  width: Int
+  height: Int
 }
 
 type RadioOptionBlock implements Block {
@@ -523,9 +647,43 @@ input TypographyBlockUpdateInput {
   align: TypographyAlign
 }
 
+extend type Video
+  @key(fields: "id primaryLanguageId")
+{
+  id: ID! @external
+  primaryLanguageId: ID! @external
+}
+
 enum VideoBlockSource {
   internal
   youTube
+}
+
+enum VideoBlockObjectFit {
+  """
+  The video is scaled to maintain its aspect ratio while filling the
+   entire VideoBlock. If the video's aspect ratio does not match the
+   aspect ratio of the VideoBlock, then the video will be clipped to fit.
+  """
+  fill
+
+  """
+  The video is scaled to maintain its aspect ratio while fitting within the
+   VideoBlock. The entire video is made to fill the VideoBlock, while
+   preserving its aspect ratio, so the video will be "letterboxed" if its
+   aspect ratio does not match the aspect ratio of the VideoBlock.
+  """
+  fit
+
+  """
+  12.5% of either side of the video is discarded (this has the effect of
+   converting a 16:9 aspect ratio to 4:3). The remaining video is scaled to
+   maintain its new aspect ratio while fitting within the VideoBlock.  The
+   remaining video is made to fill the VideoBlock, while preserving its new
+   aspect ratio, so the video will be "letterboxed" if its new aspect ratio
+   does not match the aspect ratio of the VideoBlock.
+  """
+  zoomed
 }
 
 type VideoBlock implements Block {
@@ -607,6 +765,9 @@ type VideoBlock implements Block {
 
   """action that should be performed when the video ends"""
   action: Action
+
+  """how the video should display within the VideoBlock"""
+  objectFit: VideoBlockObjectFit
 }
 
 input VideoBlockCreateInput {
@@ -655,6 +816,9 @@ input VideoBlockCreateInput {
   True if the coverBlockId in a parent block should be set to this block's id.
   """
   isCover: Boolean
+
+  """how the video should display within the VideoBlock"""
+  objectFit: VideoBlockObjectFit
 }
 
 input VideoBlockUpdateInput {
@@ -693,6 +857,9 @@ input VideoBlockUpdateInput {
   """
   posterBlockId: ID
   fullsize: Boolean
+
+  """how the video should display within the VideoBlock"""
+  objectFit: VideoBlockObjectFit
 }
 
 """
@@ -814,6 +981,12 @@ input JourneyViewEventCreateInput {
 
   """languageId of the journey being viewed"""
   value: ID
+}
+
+extend type Language
+  @key(fields: "id")
+{
+  id: ID! @external
 }
 
 type JourneyViewEvent implements Event {
@@ -1346,6 +1519,37 @@ type PowerBiEmbed {
   expiration: String!
 }
 
+type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
+}
+
+extend type Query {
+  adminJourneys(status: [JourneyStatus!], template: Boolean): [Journey!]!
+  adminJourneysReport(reportType: JourneysReportType!): PowerBiEmbed
+  adminJourney(id: ID!, idType: IdType): Journey
+  journeys(where: JourneysFilter): [Journey!]!
+  journey(id: ID!, idType: IdType): Journey
+  getJourneyProfile: JourneyProfile
+  userInvites(journeyId: ID!): [UserInvite!]
+  getUserRole: UserRole
+
+  """A list of visitors that are connected with a specific team."""
+  visitorsConnection(
+    """Returns the visitor items related to a specific team."""
+    teamId: String!
+
+    """Returns the first n elements from the list."""
+    first: Int
+
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+  ): VisitorsConnection!
+
+  """Get a single visitor"""
+  visitor(id: ID!): Visitor!
+}
+
 input JourneyCreateInput {
   """
   ID should be unique Response UUID
@@ -1380,17 +1584,45 @@ input JourneyUpdateInput {
   seoDescription: String
 }
 
-type UserJourney @key(fields: "id") {
+type UserJourney
+  @key(fields: "id")
+{
   journey: Journey
   id: ID!
   userId: ID!
   journeyId: ID!
   role: UserJourneyRole!
   user: User
+
+  """Date time of when the journey was first opened"""
+  openedAt: DateTime
 }
 
 input JourneyTemplateInput {
   template: Boolean
+}
+
+type JourneyProfile
+  @key(fields: "id")
+{
+  id: ID!
+  userId: ID!
+  acceptedTermsAt: DateTime
+}
+
+type UserInvite
+  @key(fields: "id")
+{
+  id: ID!
+  journeyId: ID!
+  senderId: ID!
+  email: String!
+  acceptedAt: DateTime
+  removedAt: DateTime
+}
+
+input UserInviteCreateInput {
+  email: String!
 }
 
 enum UserJourneyRole {
@@ -1399,7 +1631,15 @@ enum UserJourneyRole {
   owner
 }
 
-type UserRole @key(fields: "id") {
+extend type User
+  @key(fields: "id")
+{
+  id: ID! @external
+}
+
+type UserRole
+  @key(fields: "id")
+{
   id: ID!
   userId: ID!
   roles: [Role!]
@@ -1464,7 +1704,9 @@ enum VisitorStatus {
 }
 
 """A visitor with attributes connected to a team."""
-type Visitor @key(fields: "id") {
+type Visitor
+  @key(fields: "id")
+{
   id: ID!
 
   """
@@ -1598,132 +1840,18 @@ input VisitorUpdateInput {
   status: VisitorStatus
 }
 
-extend type Mutation {
-  blockDeleteAction(id: ID!, journeyId: ID!): Block!
-  blockUpdateNavigateAction(id: ID!, journeyId: ID!, input: NavigateActionInput!): NavigateAction!
-  blockUpdateNavigateToBlockAction(id: ID!, journeyId: ID!, input: NavigateToBlockActionInput!): NavigateToBlockAction!
-  blockUpdateNavigateToJourneyAction(id: ID!, journeyId: ID!, input: NavigateToJourneyActionInput!): NavigateToJourneyAction!
-  blockUpdateLinkAction(id: ID!, journeyId: ID!, input: LinkActionInput!): LinkAction!
-
-  """blockDelete returns the updated sibling blocks on successful delete"""
-  blockDelete(id: ID!, journeyId: ID!, parentBlockId: ID): [Block!]!
-
-  """
-  blockDuplicate returns the updated block, it's children and sibling blocks on successful duplicate
-  """
-  blockDuplicate(
-    id: ID!
-    journeyId: ID!
-
-    """
-    parentOrder defines the position to add the duplicated block. Negative values defines the position from the end of the array. Positions greater than the length of the array or null parentOrder will add duplicate at end of the array.
-    """
-    parentOrder: Int
-  ): [Block!]!
-  blockOrderUpdate(id: ID!, journeyId: ID!, parentOrder: Int!): [Block!]!
-  buttonBlockCreate(input: ButtonBlockCreateInput!): ButtonBlock!
-  buttonBlockUpdate(id: ID!, journeyId: ID!, input: ButtonBlockUpdateInput!): ButtonBlock
-  cardBlockCreate(input: CardBlockCreateInput!): CardBlock!
-  cardBlockUpdate(id: ID!, journeyId: ID!, input: CardBlockUpdateInput!): CardBlock!
-  iconBlockCreate(input: IconBlockCreateInput!): IconBlock!
-  iconBlockUpdate(id: ID!, journeyId: ID!, input: IconBlockUpdateInput!): IconBlock!
-  imageBlockCreate(input: ImageBlockCreateInput!): ImageBlock!
-  imageBlockUpdate(id: ID!, journeyId: ID!, input: ImageBlockUpdateInput!): ImageBlock!
-  radioOptionBlockCreate(input: RadioOptionBlockCreateInput!): RadioOptionBlock!
-  radioQuestionBlockCreate(input: RadioQuestionBlockCreateInput!): RadioQuestionBlock!
-  radioOptionBlockUpdate(id: ID!, journeyId: ID!, input: RadioOptionBlockUpdateInput!): RadioOptionBlock!
-  radioQuestionBlockUpdate(id: ID!, journeyId: ID!, parentBlockId: ID!): RadioQuestionBlock!
-  signUpBlockCreate(input: SignUpBlockCreateInput!): SignUpBlock!
-  signUpBlockUpdate(id: ID!, journeyId: ID!, input: SignUpBlockUpdateInput!): SignUpBlock
-  stepBlockCreate(input: StepBlockCreateInput!): StepBlock!
-  stepBlockUpdate(id: ID!, journeyId: ID!, input: StepBlockUpdateInput!): StepBlock!
-  textResponseBlockCreate(input: TextResponseBlockCreateInput!): TextResponseBlock!
-  textResponseBlockUpdate(id: ID!, journeyId: ID!, input: TextResponseBlockUpdateInput!): TextResponseBlock
-  typographyBlockCreate(input: TypographyBlockCreateInput!): TypographyBlock!
-  typographyBlockUpdate(id: ID!, journeyId: ID!, input: TypographyBlockUpdateInput!): TypographyBlock!
-  videoBlockCreate(input: VideoBlockCreateInput!): VideoBlock!
-  videoBlockUpdate(id: ID!, journeyId: ID!, input: VideoBlockUpdateInput!): VideoBlock!
-  buttonClickEventCreate(input: ButtonClickEventCreateInput!): ButtonClickEvent!
-  chatOpenEventCreate(input: ChatOpenEventCreateInput!): ChatOpenEvent!
-  journeyViewEventCreate(input: JourneyViewEventCreateInput!): JourneyViewEvent!
-  radioQuestionSubmissionEventCreate(input: RadioQuestionSubmissionEventCreateInput!): RadioQuestionSubmissionEvent!
-  signUpSubmissionEventCreate(input: SignUpSubmissionEventCreateInput!): SignUpSubmissionEvent!
-  stepViewEventCreate(input: StepViewEventCreateInput!): StepViewEvent!
-  stepNextEventCreate(input: StepNextEventCreateInput!): StepNextEvent!
-  textResponseSubmissionEventCreate(input: TextResponseSubmissionEventCreateInput!): TextResponseSubmissionEvent!
-  videoStartEventCreate(input: VideoStartEventCreateInput!): VideoStartEvent!
-  videoPlayEventCreate(input: VideoPlayEventCreateInput!): VideoPlayEvent!
-  videoPauseEventCreate(input: VideoPauseEventCreateInput!): VideoPauseEvent!
-  videoCompleteEventCreate(input: VideoCompleteEventCreateInput!): VideoCompleteEvent!
-  videoExpandEventCreate(input: VideoExpandEventCreateInput!): VideoExpandEvent!
-  videoCollapseEventCreate(input: VideoCollapseEventCreateInput!): VideoCollapseEvent!
-  videoProgressEventCreate(input: VideoProgressEventCreateInput!): VideoProgressEvent!
-  journeyCreate(input: JourneyCreateInput!): Journey!
-  journeyDuplicate(id: ID!): Journey!
-  journeyUpdate(id: ID!, input: JourneyUpdateInput!): Journey!
-
-  """Sets journey status to published"""
-  journeyPublish(id: ID!): Journey
-
-  """Sets journeys statuses to archived"""
-  journeysArchive(ids: [ID!]!): [Journey]
-
-  """Sets journeys statuses to deleted"""
-  journeysDelete(ids: [ID!]!): [Journey]
-
-  """Sets journeys statuses to trashed"""
-  journeysTrash(ids: [ID!]!): [Journey]
-
-  """Sets journeys statuses to last active status"""
-  journeysRestore(ids: [ID!]!): [Journey]
-
-  """Updates template"""
-  journeyTemplate(id: ID!, input: JourneyTemplateInput!): Journey!
-  userJourneyApprove(id: ID!): UserJourney!
-  userJourneyPromote(id: ID!): UserJourney!
-  userJourneyRemove(id: ID!): UserJourney!
-
-  """Removes all userJourneys associated with a journeyId"""
-  userJourneyRemoveAll(id: ID!): [UserJourney!]!
-  userJourneyRequest(journeyId: ID!, idType: IdType): UserJourney!
-
-  """Update a visitor"""
-  visitorUpdate(id: ID!, input: VisitorUpdateInput!): Visitor!
+type Translation {
+  value: String!
+  language: Language!
+  primary: Boolean!
 }
 
-extend type Video @key(fields: "id primaryLanguageId") {
-  id: ID! @external
-  primaryLanguageId: ID! @external
+scalar _FieldSet
+
+scalar _Any
+
+type _Service {
+  sdl: String
 }
 
-extend type Language @key(fields: "id") {
-  id: ID! @external
-}
-
-extend type Query {
-  adminJourneys(status: [JourneyStatus!], template: Boolean): [Journey!]!
-  adminJourneysReport(reportType: JourneysReportType!): PowerBiEmbed
-  adminJourney(id: ID!, idType: IdType): Journey
-  journeys(where: JourneysFilter): [Journey!]!
-  journey(id: ID!, idType: IdType): Journey
-  getUserRole: UserRole
-
-  """A list of visitors that are connected with a specific team."""
-  visitorsConnection(
-    """Returns the visitor items related to a specific team."""
-    teamId: String!
-
-    """Returns the first n elements from the list."""
-    first: Int
-
-    """Returns the elements in the list that come after the specified cursor."""
-    after: String
-  ): VisitorsConnection!
-
-  """Get a single visitor"""
-  visitor(id: ID!): Visitor!
-}
-
-extend type User @key(fields: "id") {
-  id: ID! @external
-}
+union _Entity = Journey | JourneyProfile | Language | User | UserInvite | UserJourney | UserRole | Video | Visitor

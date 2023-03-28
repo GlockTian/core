@@ -4,7 +4,7 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/node:build",
+      "executor": "@nrwl/node:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/api-users",
@@ -15,6 +15,11 @@
           {
             "glob": "**/*.graphql",
             "input": "apps/api-users/src/app/",
+            "output": "./assets"
+          },
+          {
+            "glob": "**/*.graphql",
+            "input": "libs/nest/common/src/lib/TranslationModule/",
             "output": "./assets"
           }
         ],
@@ -40,24 +45,17 @@
         "command": "npx ts-node apps/api-users/db/seed.ts"
       }
     },
-    "serve-nowatch": {
-      "executor": "@nrwl/node:execute",
+    "serve": {
+      "executor": "@nrwl/node:node",
       "options": {
-        "buildTarget": "api-users:build"
+        "buildTarget": "api-users:build",
+        "inspect": false
       }
     },
-    "serve": {
+    "watcher": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "commands": [
-          {
-            "command": "nx serve-nowatch api-users"
-          },
-          {
-            "command": "npx ts-node apps/api-users/src/generate-typings.ts"
-          }
-        ],
-        "parallel": true
+        "command": "npx ts-node tools/scripts/generate-typings.ts api-users"
       }
     },
     "lint": {
@@ -78,21 +76,19 @@
     "generate-graphql": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "commands": [
-          {
-            "command": "rover subgraph introspect http://localhost:4002/graphql > apps/api-users/schema.graphql"
-          }
-        ]
+        "command": "rover subgraph introspect http://localhost:4002/graphql > apps/api-users/schema.graphql"
+      }
+    },
+    "subgraph-check": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "rover subgraph check API-GATEWAY-0zuda@current --name api-users --schema apps/api-users/schema.graphql"
       }
     },
     "fetch-secrets": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "commands": [
-          {
-            "command": "DOPPLER_TOKEN=$DOPPLER_API_USERS_TOKEN doppler secrets download --no-file --format=env-no-quotes --project api-users > apps/api-users/.env"
-          }
-        ]
+        "command": "DOPPLER_TOKEN=$DOPPLER_API_USERS_TOKEN doppler secrets download --no-file --format=env-no-quotes --project api-users > apps/api-users/.env"
       }
     }
   },

@@ -2,7 +2,7 @@ import { Args, Mutation, Parent, ResolveField, Resolver } from '@nestjs/graphql'
 import { UseGuards } from '@nestjs/common'
 import { object, string } from 'yup'
 import fetch from 'node-fetch'
-import { UserInputError } from 'apollo-server'
+import { UserInputError } from 'apollo-server-errors'
 import { BlockService } from '../block.service'
 import {
   Action,
@@ -23,8 +23,8 @@ const videoBlockYouTubeSchema = object().shape({
   )
 })
 const videoBlockInternalSchema = object().shape({
-  videoId: string().required(),
-  videoVariantLanguageId: string().required()
+  videoId: string().nullable(),
+  videoVariantLanguageId: string().nullable()
 })
 
 export interface YoutubeVideosData {
@@ -87,7 +87,8 @@ export class VideoBlockResolver {
         await videoBlockYouTubeSchema.validate(input)
         input = {
           ...input,
-          ...(await this.fetchFieldsFromYouTube(input.videoId as string))
+          ...(await this.fetchFieldsFromYouTube(input.videoId as string)),
+          objectFit: null
         }
         break
       case VideoBlockSource.internal:
@@ -155,14 +156,15 @@ export class VideoBlockResolver {
     @Args('journeyId') journeyId: string,
     @Args('input') input: VideoBlockUpdateInput
   ): Promise<VideoBlock> {
-    const block = await this.blockService.get<VideoBlock>(id)
+    const block = await this.blockService.get(id)
     switch (input.source ?? block.source) {
       case VideoBlockSource.youTube:
         await videoBlockYouTubeSchema.validate({ ...block, ...input })
         if (input.videoId != null) {
           input = {
             ...input,
-            ...(await this.fetchFieldsFromYouTube(input.videoId))
+            ...(await this.fetchFieldsFromYouTube(input.videoId)),
+            objectFit: null
           }
         }
         break

@@ -13,24 +13,27 @@ locals {
     "POWER_BI_JOURNEYS_SINGLE_FULL_REPORT_ID",
     "POWER_BI_JOURNEYS_SINGLE_SUMMARY_REPORT_ID",
     "POWER_BI_TENANT_ID",
-    "POWER_BI_WORKSPACE_ID"
+    "POWER_BI_WORKSPACE_ID",
+    "GOOGLE_APPLICATION_JSON"
   ]
   service_config = {
     name           = "api-journeys"
     is_public      = false
     container_port = local.port
     host_port      = local.port
-    cpu            = 512
-    memory         = 1024
+    cpu            = 1024
+    memory         = 2048
     desired_count  = 1
-    image_tag      = var.ecs_config.image_tag
     alb_dns_name   = var.ecs_config.alb_dns_name
     zone_id        = var.ecs_config.zone_id
+    alb_listener = merge(var.ecs_config.alb_listener, {
+      port = local.port
+    })
     alb_target_group = merge(var.ecs_config.alb_target_group, {
       port = local.port
     })
     auto_scaling = {
-      max_capacity = 2
+      max_capacity = 4
       min_capacity = 1
       cpu = {
         target_value = 75

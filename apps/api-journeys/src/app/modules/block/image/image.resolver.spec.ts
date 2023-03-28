@@ -1,8 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { Database } from 'arangojs'
 import { mockDeep } from 'jest-mock-extended'
-
-import axios from 'axios'
+import fetch, { Response } from 'node-fetch'
 import {
   CardBlock,
   ImageBlock,
@@ -14,10 +13,18 @@ import { BlockResolver } from '../block.resolver'
 import { BlockService } from '../block.service'
 import { UserRoleService } from '../../userRole/userRole.service'
 import { JourneyService } from '../../journey/journey.service'
-import { ImageBlockResolver } from './image.resolver'
+import { MemberService } from '../../member/member.service'
+import { handleImage, ImageBlockResolver } from './image.resolver'
 
-jest.mock('axios')
-const mockedAxios = axios as jest.Mocked<typeof axios>
+jest.mock('node-fetch', () => {
+  const originalModule = jest.requireActual('node-fetch')
+  return {
+    __esModule: true,
+    ...originalModule,
+    default: jest.fn()
+  }
+})
+const mockFetch = fetch as jest.MockedFunction<typeof fetch>
 
 jest.mock('sharp', () => () => ({
   raw: () => ({
@@ -75,6 +82,22 @@ describe('ImageBlockResolver', () => {
     fullscreen: true
   }
 
+  const blockCreateForDeletedCover: ImageBlockCreateInput = {
+    ...blockCreate,
+    parentBlockId: 'parentBlockWithDeletedCoverId'
+  }
+
+  const createdBlockForDeletedCover: ImageBlock = {
+    ...createdBlock,
+    parentBlockId: 'parentBlockWithDeletedCoverId'
+  }
+
+  const parentBlockWithDeletedCover: CardBlock = {
+    ...parentBlock,
+    id: 'parentBlockWithDeletedCoverId',
+    coverBlockId: 'nonExistentBlock'
+  }
+
   const blockUpdate: ImageBlockUpdateInput = {
     src: 'https://unsplash.it/640/425?image=42',
     alt: 'placeholder image from unsplash'
@@ -91,9 +114,22 @@ describe('ImageBlockResolver', () => {
   const blockService = {
     provide: BlockService,
     useFactory: () => ({
-      get: jest.fn((id) =>
-        id === blockCreate.id ? createdBlock : parentBlock
-      ),
+      get: jest.fn((id) => {
+        switch (id) {
+          case blockCreate.id: {
+            return createdBlock
+          }
+          case parentBlock.id: {
+            return parentBlock
+          }
+          case parentBlockWithDeletedCover.id: {
+            return parentBlockWithDeletedCover
+          }
+          default: {
+            return undefined
+          }
+        }
+      }),
       getAll: jest.fn(() => [createdBlock, createdBlock]),
       getSiblings: jest.fn(() => [createdBlock, createdBlock]),
       removeBlockAndChildren: jest.fn((input) => input),
@@ -110,6 +146,7 @@ describe('ImageBlockResolver', () => {
         UserJourneyService,
         UserRoleService,
         JourneyService,
+        MemberService,
         {
           provide: 'DATABASE',
           useFactory: () => mockDeep<Database>()
@@ -119,6 +156,15 @@ describe('ImageBlockResolver', () => {
     blockResolver = module.get<BlockResolver>(BlockResolver)
     resolver = module.get<ImageBlockResolver>(ImageBlockResolver)
     service = await module.resolve(BlockService)
+
+    // this kinda doesnt matter since sharp returns the data we need, but still need to mock so it doesnt run the API
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      buffer: async () =>
+        await Promise.resolve({
+          items: []
+        })
+    } as unknown as Response)
   })
 
   describe('ImageBlock', () => {
@@ -130,12 +176,6 @@ describe('ImageBlockResolver', () => {
 
   describe('imageBlockCreate', () => {
     it('creates an ImageBlock', async () => {
-      mockedAxios.get.mockResolvedValue({
-        data: {
-          mockData: 'mockData' // this kinda doesnt matter since sharp returns the data we need, but still need to mock so it doesnt run the API
-        }
-      })
-
       await resolver.imageBlockCreate(blockCreate)
 
       expect(service.getSiblings).toHaveBeenCalledWith(
@@ -162,6 +202,26 @@ describe('ImageBlockResolver', () => {
         coverBlockId: createdBlock.id
       })
     })
+
+    it('checks of cover image block needs to be deleted before creating new coverImage block', async () => {
+      await resolver.imageBlockCreate({
+        ...blockCreateForDeletedCover,
+        isCover: true
+      })
+
+      expect(service.save).toHaveBeenCalledWith({
+        ...createdBlockForDeletedCover,
+        isCover: true,
+        parentOrder: null
+      })
+      expect(service.removeBlockAndChildren).not.toHaveBeenCalled()
+      expect(service.update).toHaveBeenCalledWith(
+        parentBlockWithDeletedCover.id,
+        {
+          coverBlockId: createdBlockForDeletedCover.id
+        }
+      )
+    })
   })
 
   describe('imageBlockUpdate', () => {
@@ -169,6 +229,20 @@ describe('ImageBlockResolver', () => {
       expect(await resolver.imageBlockUpdate('1', '2', blockUpdate)).toEqual(
         updatedBlock
       )
+    })
+  })
+
+  describe('handleImage', () => {
+    it('should skip processing of image block if blurhash, width and height are defined', async () => {
+      const imageBlock = {
+        id: '1',
+        journeyId: '2',
+        width: 640,
+        height: 425,
+        blurhash: 'UHFO~6Yk^6#M@-5b,1J5@[or[k6o};Fxi^OZ',
+        src: 'bad url that would cause exception in sharp'
+      }
+      expect(await handleImage(imageBlock)).toEqual(imageBlock)
     })
   })
 })

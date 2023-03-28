@@ -27,6 +27,7 @@ const videoInternal: TreeBlock<VideoBlock> = {
   description: null,
   duration: null,
   image: null,
+  objectFit: null,
   video: {
     __typename: 'Video',
     id: '2_0-FallingPlates',
@@ -102,6 +103,7 @@ const videoYouTube: TreeBlock<VideoBlock> = {
   action: null,
   source: VideoBlockSource.youTube,
   video: null,
+  objectFit: null,
   posterBlockId: 'poster1.id',
   children: []
 }
@@ -112,11 +114,7 @@ describe('VideoBlockEditor', () => {
       const { getByText } = render(
         <ThemeProvider>
           <MockedProvider mocks={mocks}>
-            <VideoBlockEditor
-              selectedBlock={null}
-              onChange={jest.fn()}
-              onDelete={jest.fn()}
-            />
+            <VideoBlockEditor selectedBlock={null} onChange={jest.fn()} />
           </MockedProvider>
         </ThemeProvider>
       )
@@ -132,7 +130,6 @@ describe('VideoBlockEditor', () => {
             <VideoBlockEditor
               selectedBlock={videoInternal}
               onChange={jest.fn()}
-              onDelete={jest.fn()}
             />
           </MockedProvider>
         </ThemeProvider>
@@ -166,7 +163,6 @@ describe('VideoBlockEditor', () => {
                 } as unknown as VideoBlock['video']
               }}
               onChange={jest.fn()}
-              onDelete={jest.fn()}
             />
           </MockedProvider>
         </ThemeProvider>
@@ -221,7 +217,6 @@ describe('VideoBlockEditor', () => {
                 } as unknown as VideoBlock['video']
               }}
               onChange={jest.fn()}
-              onDelete={jest.fn()}
             />
           </MockedProvider>
         </ThemeProvider>
@@ -262,7 +257,6 @@ describe('VideoBlockEditor', () => {
                 } as unknown as VideoBlock['video']
               }}
               onChange={jest.fn()}
-              onDelete={jest.fn()}
             />
           </MockedProvider>
         </ThemeProvider>
@@ -280,7 +274,6 @@ describe('VideoBlockEditor', () => {
             <VideoBlockEditor
               selectedBlock={videoYouTube}
               onChange={jest.fn()}
-              onDelete={jest.fn()}
             />
           </MockedProvider>
         </ThemeProvider>
@@ -296,7 +289,6 @@ describe('VideoBlockEditor', () => {
           <VideoBlockEditor
             selectedBlock={videoInternal}
             onChange={jest.fn()}
-            onDelete={jest.fn()}
           />
         </MockedProvider>
       </ThemeProvider>

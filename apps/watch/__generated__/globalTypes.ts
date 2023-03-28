@@ -148,132 +148,147 @@ export enum UserJourneyRole {
   owner = "owner",
 }
 
+export enum VideoBlockObjectFit {
+  fill = "fill",
+  fit = "fit",
+  zoomed = "zoomed",
+}
+
 export enum VideoBlockSource {
   internal = "internal",
   youTube = "youTube",
 }
 
-export enum VideoType {
+export enum VideoLabel {
+  collection = "collection",
   episode = "episode",
-  playlist = "playlist",
-  standalone = "standalone",
+  featureFilm = "featureFilm",
+  segment = "segment",
+  series = "series",
+  shortFilm = "shortFilm",
+}
+
+export enum VideoVariantDownloadQuality {
+  high = "high",
+  low = "low",
 }
 
 export interface ButtonClickEventCreateInput {
-  blockId: string;
   id?: string | null;
-  label?: string | null;
+  blockId: string;
   stepId?: string | null;
+  label?: string | null;
   value?: string | null;
 }
 
 export interface ChatOpenEventCreateInput {
-  blockId: string;
   id?: string | null;
+  blockId: string;
   stepId?: string | null;
   value?: MessagePlatform | null;
 }
 
 export interface RadioQuestionSubmissionEventCreateInput {
-  blockId: string;
   id?: string | null;
-  label?: string | null;
+  blockId: string;
   radioOptionBlockId: string;
   stepId?: string | null;
+  label?: string | null;
   value?: string | null;
 }
 
 export interface SignUpSubmissionEventCreateInput {
-  blockId: string;
-  email: string;
   id?: string | null;
-  name: string;
+  blockId: string;
   stepId?: string | null;
+  name: string;
+  email: string;
 }
 
 export interface StepViewEventCreateInput {
-  blockId: string;
   id?: string | null;
+  blockId: string;
   value?: string | null;
 }
 
 export interface TextResponseSubmissionEventCreateInput {
-  blockId: string;
   id?: string | null;
-  label?: string | null;
+  blockId: string;
   stepId?: string | null;
+  label?: string | null;
   value: string;
 }
 
 export interface VideoCollapseEventCreateInput {
-  blockId: string;
   id?: string | null;
-  label?: string | null;
-  position?: number | null;
+  blockId: string;
   stepId?: string | null;
+  position?: number | null;
+  label?: string | null;
   value?: VideoBlockSource | null;
 }
 
 export interface VideoCompleteEventCreateInput {
-  blockId: string;
   id?: string | null;
-  label?: string | null;
-  position?: number | null;
+  blockId: string;
   stepId?: string | null;
+  position?: number | null;
+  label?: string | null;
   value?: VideoBlockSource | null;
 }
 
 export interface VideoExpandEventCreateInput {
-  blockId: string;
   id?: string | null;
-  label?: string | null;
-  position?: number | null;
+  blockId: string;
   stepId?: string | null;
+  position?: number | null;
+  label?: string | null;
   value?: VideoBlockSource | null;
 }
 
 export interface VideoPauseEventCreateInput {
-  blockId: string;
   id?: string | null;
-  label?: string | null;
-  position?: number | null;
+  blockId: string;
   stepId?: string | null;
+  position?: number | null;
+  label?: string | null;
   value?: VideoBlockSource | null;
 }
 
 export interface VideoPlayEventCreateInput {
-  blockId: string;
   id?: string | null;
-  label?: string | null;
-  position?: number | null;
+  blockId: string;
   stepId?: string | null;
+  position?: number | null;
+  label?: string | null;
   value?: VideoBlockSource | null;
 }
 
 export interface VideoProgressEventCreateInput {
-  blockId: string;
   id?: string | null;
-  label?: string | null;
+  blockId: string;
+  stepId?: string | null;
   position?: number | null;
   progress: number;
-  stepId?: string | null;
+  label?: string | null;
   value?: VideoBlockSource | null;
 }
 
 export interface VideoStartEventCreateInput {
-  blockId: string;
   id?: string | null;
-  label?: string | null;
-  position?: number | null;
+  blockId: string;
   stepId?: string | null;
+  position?: number | null;
+  label?: string | null;
   value?: VideoBlockSource | null;
 }
 
 export interface VideosFilter {
   availableVariantLanguageIds?: string[] | null;
-  tagId?: string | null;
   title?: string | null;
-  types?: VideoType[] | null;
+  labels?: VideoLabel[] | null;
+  ids?: string[] | null;
+  subtitleLanguageIds?: string[] | null;
 }
 
 //==============================================================

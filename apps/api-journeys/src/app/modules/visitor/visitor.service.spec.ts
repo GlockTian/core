@@ -3,7 +3,7 @@ import { Database } from 'arangojs'
 import { DeepMockProxy, mockDeep } from 'jest-mock-extended'
 import { mockDbQueryResult } from '@core/nest/database/mock'
 import { v4 as uuidv4 } from 'uuid'
-import { DocumentCollection } from 'arangojs/collection'
+import { DocumentCollection, EdgeCollection } from 'arangojs/collection'
 import { AqlQuery } from 'arangojs/aql'
 import { keyAsId } from '@core/nest/decorators/KeyAsId'
 import { VisitorService } from './visitor.service'
@@ -16,7 +16,9 @@ jest.mock('uuid', () => ({
 const mockUuidv4 = uuidv4 as jest.MockedFunction<typeof uuidv4>
 
 describe('VisitorService', () => {
-  let service: VisitorService, db: DeepMockProxy<Database>
+  let service: VisitorService,
+    db: DeepMockProxy<Database>,
+    collectionMock: DeepMockProxy<DocumentCollection & EdgeCollection>
 
   beforeAll(() => {
     jest.useFakeTimers('modern')
@@ -24,19 +26,20 @@ describe('VisitorService', () => {
   })
 
   beforeEach(async () => {
+    db = mockDeep()
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         VisitorService,
         {
           provide: 'DATABASE',
-          useFactory: () => mockDeep<Database>()
+          useFactory: () => db
         }
       ]
     }).compile()
 
     service = module.get<VisitorService>(VisitorService)
-    db = service.db as DeepMockProxy<Database>
-    service.collection = mockDeep<DocumentCollection>()
+    collectionMock = mockDeep()
+    service.collection = collectionMock
   })
 
   afterAll(() => {
@@ -60,15 +63,15 @@ describe('VisitorService', () => {
     LET $edges_plus_one = (
       FOR item IN visitors
         FILTER item.@value0 == @value1
-        SORT item.createdAt @value2
-        LIMIT @value3 + 1
-        RETURN { cursor: item._key, node: MERGE({ id: item._key }, item) }
+        SORT item.createdAt DESC
+        LIMIT @value2 + 1
+        RETURN { cursor: item.createdAt, node: MERGE(item, { id: item._key }) }
     )
-    LET $edges = SLICE($edges_plus_one, 0, @value3)
+    LET $edges = SLICE($edges_plus_one, 0, @value2)
     RETURN {
       edges: $edges,
       pageInfo: {
-        hasNextPage: LENGTH($edges_plus_one) == @value3 + 1,
+        hasNextPage: LENGTH($edges_plus_one) == @value2 + 1,
         startCursor: LENGTH($edges) > 0 ? FIRST($edges).cursor : null,
         endCursor: LENGTH($edges) > 0 ? LAST($edges).cursor : null
       }
@@ -77,8 +80,7 @@ describe('VisitorService', () => {
         expect(bindVars).toEqual({
           value0: 'teamId',
           value1: 'jfp-team',
-          value2: 'ASC',
-          value3: 50
+          value2: 50
         })
         return await mockDbQueryResult(service.db, [connection])
       })
@@ -94,8 +96,7 @@ describe('VisitorService', () => {
           value0: 'cursorId',
           value1: 'teamId',
           value2: 'jfp-team',
-          value3: 'ASC',
-          value4: 50
+          value3: 50
         })
         return await mockDbQueryResult(service.db, [connection])
       })
@@ -103,24 +104,6 @@ describe('VisitorService', () => {
         first: 50,
         after: 'cursorId',
         filter: { teamId: 'jfp-team' }
-      })
-    })
-
-    it('allows custom sort order of the visitors connection', async () => {
-      db.query.mockImplementation(async (q) => {
-        const { bindVars } = q as unknown as AqlQuery
-        expect(bindVars).toEqual({
-          value0: 'teamId',
-          value1: 'jfp-team',
-          value2: 'DESC',
-          value3: 50
-        })
-        return await mockDbQueryResult(service.db, [connection])
-      })
-      await service.getList({
-        first: 50,
-        filter: { teamId: 'jfp-team' },
-        sortOrder: 'DESC'
       })
     })
   })
@@ -162,6 +145,7 @@ describe('VisitorService', () => {
       await service.getByUserIdAndJourneyId('user.id', 'team.id')
       expect(service.collection.save).toHaveBeenCalledWith({
         ...visitorWithId,
+        _key: 'newVisitor.id',
         id: 'newVisitor.id',
         createdAt: new Date().toISOString()
       })

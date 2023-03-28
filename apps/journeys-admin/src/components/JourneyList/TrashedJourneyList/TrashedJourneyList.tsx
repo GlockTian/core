@@ -7,6 +7,8 @@ import { Dialog } from '@core/shared/ui/Dialog'
 import { useTranslation } from 'react-i18next'
 import { useSnackbar } from 'notistack'
 import { AuthUser } from 'next-firebase-auth'
+import { JourneyProvider } from '@core/journeys/ui/JourneyProvider'
+import { JourneyFields } from '../../../../__generated__/JourneyFields'
 import {
   GetTrashedJourneys,
   GetTrashedJourneys_journeys as TrashedJourney
@@ -14,6 +16,7 @@ import {
 import { JourneyCard } from '../JourneyCard'
 import { SortOrder } from '../JourneySort'
 import { sortJourneys } from '../JourneySort/utils/sortJourneys'
+import { DiscoveryJourneys } from '../../DiscoveryJourneys'
 
 export const GET_TRASHED_JOURNEYS = gql`
   query GetTrashedJourneys {
@@ -40,6 +43,7 @@ export const GET_TRASHED_JOURNEYS = gql`
       userJourneys {
         id
         role
+        openedAt
         user {
           id
           firstName
@@ -203,8 +207,21 @@ export function TrashedJourneyList({
       {journeys != null && sortedJourneys != null ? (
         <>
           {sortedJourneys.map((journey) => (
-            <JourneyCard key={journey.id} journey={journey} refetch={refetch} />
+            <JourneyProvider
+              key={journey.id}
+              value={{
+                journey: journey as unknown as JourneyFields,
+                admin: true
+              }}
+            >
+              <JourneyCard
+                key={journey.id}
+                journey={journey}
+                refetch={refetch}
+              />
+            </JourneyProvider>
           ))}
+
           {sortedJourneys.length === 0 && (
             <>
               <Card
@@ -226,7 +243,9 @@ export function TrashedJourneyList({
               </Card>
             </>
           )}
+
           <span>
+            <DiscoveryJourneys />
             <Box width="100%" sx={{ textAlign: 'center' }}>
               <Typography variant="caption">
                 {t('Trashed journeys are moved here for up to 40 days.')}

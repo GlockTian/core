@@ -8,11 +8,10 @@ import {
   GetJourney_journey_blocks_CardBlock as CardBlock,
   GetJourney_journey_blocks_VideoBlock as VideoBlock
 } from '../../../../../../../../../__generated__/GetJourney'
-import { CardBlockBackgroundImageUpdate } from '../../../../../../../../../__generated__/CardBlockBackgroundImageUpdate'
 import { CardBlockImageBlockCreate } from '../../../../../../../../../__generated__/CardBlockImageBlockCreate'
 import { CardBlockImageBlockUpdate } from '../../../../../../../../../__generated__/CardBlockImageBlockUpdate'
 import { BlockDeleteForBackgroundImage } from '../../../../../../../../../__generated__/BlockDeleteForBackgroundImage'
-import { ImageBlockEditor } from '../../../../../../ImageBlockEditor'
+import { ImageSource } from '../../../../../../ImageSource'
 import { blockDeleteUpdate } from '../../../../../../../../libs/blockDeleteUpdate/blockDeleteUpdate'
 
 export const BLOCK_DELETE_FOR_BACKGROUND_IMAGE = gql`
@@ -24,19 +23,6 @@ export const BLOCK_DELETE_FOR_BACKGROUND_IMAGE = gql`
     blockDelete(id: $id, parentBlockId: $parentBlockId, journeyId: $journeyId) {
       id
       parentOrder
-    }
-  }
-`
-
-export const CARD_BLOCK_COVER_IMAGE_UPDATE = gql`
-  mutation CardBlockBackgroundImageUpdate(
-    $id: ID!
-    $journeyId: ID!
-    $input: CardBlockUpdateInput!
-  ) {
-    cardBlockUpdate(id: $id, journeyId: $journeyId, input: $input) {
-      id
-      coverBlockId
     }
   }
 `
@@ -87,12 +73,9 @@ export function BackgroundMediaImage({
 
   const imageCover = coverBlock?.__typename === 'ImageBlock' ? coverBlock : null
 
-  const [cardBlockUpdate] = useMutation<CardBlockBackgroundImageUpdate>(
-    CARD_BLOCK_COVER_IMAGE_UPDATE
-  )
-  const [imageBlockCreate, { loading: createLoading }] =
+  const [imageBlockCreate, { loading: createLoading, error: createError }] =
     useMutation<CardBlockImageBlockCreate>(CARD_BLOCK_COVER_IMAGE_BLOCK_CREATE)
-  const [imageBlockUpdate, { loading: updateLoading }] =
+  const [imageBlockUpdate, { loading: updateLoading, error: updateError }] =
     useMutation<CardBlockImageBlockUpdate>(CARD_BLOCK_COVER_IMAGE_BLOCK_UPDATE)
   const [blockDelete] = useMutation<BlockDeleteForBackgroundImage>(
     BLOCK_DELETE_FOR_BACKGROUND_IMAGE
@@ -128,23 +111,6 @@ export function BackgroundMediaImage({
         blockDeleteUpdate(coverBlock, data?.blockDelete, cache, journey.id)
       }
     })
-
-    await cardBlockUpdate({
-      variables: {
-        id: cardBlock.id,
-        journeyId: journey.id,
-        input: {
-          coverBlockId: null
-        }
-      },
-      optimisticResponse: {
-        cardBlockUpdate: {
-          id: cardBlock.id,
-          coverBlockId: null,
-          __typename: 'CardBlock'
-        }
-      }
-    })
   }
 
   const createImageBlock = async (block): Promise<void> => {
@@ -157,6 +123,9 @@ export function BackgroundMediaImage({
           parentBlockId: cardBlock.id,
           src: block.src,
           alt: block.alt,
+          blurhash: block.blurhash,
+          width: block.width,
+          height: block.height,
           isCover: true
         }
       },
@@ -200,7 +169,10 @@ export function BackgroundMediaImage({
         journeyId: journey.id,
         input: {
           src: block.src,
-          alt: block.alt
+          alt: block.alt,
+          blurhash: block.blurhash,
+          width: block.width,
+          height: block.height
         }
       }
     })
@@ -215,10 +187,6 @@ export function BackgroundMediaImage({
       } else {
         await updateImageBlock(block)
       }
-      enqueueSnackbar('Image Updated', {
-        variant: 'success',
-        preventDuplicate: true
-      })
     } catch (e) {
       enqueueSnackbar(e.message, {
         variant: 'error',
@@ -228,11 +196,12 @@ export function BackgroundMediaImage({
   }
 
   return (
-    <ImageBlockEditor
+    <ImageSource
       selectedBlock={imageCover}
       onChange={handleChange}
       onDelete={handleImageDelete}
       loading={createLoading || updateLoading}
+      error={createError != null ?? updateError != null}
     />
   )
 }

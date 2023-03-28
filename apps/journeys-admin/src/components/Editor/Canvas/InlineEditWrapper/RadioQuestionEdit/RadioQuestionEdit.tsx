@@ -24,7 +24,7 @@ export const RADIO_OPTION_BLOCK_CREATE = gql`
   }
 `
 
-export interface RadioQuestionEditProps extends TreeBlock<RadioQuestionFields> {
+interface RadioQuestionEditProps extends TreeBlock<RadioQuestionFields> {
   wrappers?: WrappersProps
 }
 
@@ -46,7 +46,7 @@ export function RadioQuestionEdit({
         input: {
           journeyId: journey.id,
           parentBlockId: id,
-          label: `Option ${props.children.length + 1}`
+          label: ''
         }
       },
       update(cache, { data }) {

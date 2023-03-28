@@ -1,11 +1,14 @@
-import { ComponentStory, Meta } from '@storybook/react'
+import { ComponentProps } from 'react'
+import { Story, Meta } from '@storybook/react'
 import { noop } from 'lodash'
+import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import MuiListItem from '@mui/material/ListItem'
 import ListItemAvatar from '@mui/material/ListItemAvatar'
 import Skeleton from '@mui/material/Skeleton'
 import ListItemText from '@mui/material/ListItemText'
+import Language from '@mui/icons-material/Language'
 import { sharedUiConfig } from '../../libs/sharedUiConfig'
 import { Dialog } from './Dialog'
 
@@ -18,7 +21,7 @@ const DialogStory = {
   }
 }
 
-const Template: ComponentStory<typeof Dialog> = ({ ...args }) => {
+const Template: Story<ComponentProps<typeof Dialog>> = ({ ...args }) => {
   return <Dialog {...args} />
 }
 
@@ -31,6 +34,14 @@ Basic.args = {
     onSubmit: noop,
     submitLabel: 'Ok'
   },
+  children: <Typography>This is the content</Typography>
+}
+
+export const IconTitle = Template.bind({})
+IconTitle.args = {
+  open: true,
+  onClose: noop,
+  dialogTitle: { icon: <Language sx={{ mr: 3 }} />, title: 'Simple Dialog' },
   children: <Typography>This is the content</Typography>
 }
 
@@ -58,6 +69,29 @@ MinHeight.args = {
     title: 'Minimum Height Dialog',
     closeButton: true
   },
+  children: <Typography>This is the content</Typography>
+}
+
+export const ActionComponent = Template.bind({})
+ActionComponent.args = {
+  open: true,
+  onClose: noop,
+  dialogTitle: {
+    title: 'Custom Action Component Dialog',
+    closeButton: true
+  },
+  dialogActionChildren: (
+    <>
+      <TextField
+        fullWidth
+        label="Dialog Action Field"
+        value="Value"
+        sx={{ ml: 4 }}
+        margin="dense"
+      />
+      <Button sx={{ mx: 2 }}>Add</Button>
+    </>
+  ),
   children: <Typography>This is the content</Typography>
 }
 

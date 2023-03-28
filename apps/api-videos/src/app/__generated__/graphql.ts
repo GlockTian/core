@@ -7,15 +7,19 @@
 
 /* tslint:disable */
 /* eslint-disable */
+
 export enum IdType {
     databaseId = "databaseId",
     slug = "slug"
 }
 
-export enum VideoType {
+export enum VideoLabel {
+    collection = "collection",
     episode = "episode",
-    standalone = "standalone",
-    playlist = "playlist"
+    featureFilm = "featureFilm",
+    segment = "segment",
+    series = "series",
+    shortFilm = "shortFilm"
 }
 
 export enum VideoVariantDownloadQuality {
@@ -26,27 +30,21 @@ export enum VideoVariantDownloadQuality {
 export class VideosFilter {
     availableVariantLanguageIds?: Nullable<string[]>;
     title?: Nullable<string>;
-    tagId?: Nullable<string>;
-    types?: Nullable<VideoType[]>;
+    labels?: Nullable<VideoLabel[]>;
+    ids?: Nullable<string[]>;
+    subtitleLanguageIds?: Nullable<string[]>;
 }
 
-export class VideoTag {
-    __typename?: 'VideoTag';
-    id: string;
-    title: Translation[];
-}
-
-export class Translation {
-    __typename?: 'Translation';
-    value: string;
-    language: Language;
-    primary: boolean;
+export class LanguageWithSlug {
+    __typename?: 'LanguageWithSlug';
+    language?: Nullable<Language>;
+    slug?: Nullable<string>;
 }
 
 export class Video {
     __typename?: 'Video';
     id: string;
-    type: VideoType;
+    label: VideoLabel;
     primaryLanguageId: string;
     title: Translation[];
     seoTitle: Translation[];
@@ -56,11 +54,21 @@ export class Video {
     image?: Nullable<string>;
     imageAlt: Translation[];
     variantLanguages: Language[];
-    slug: Translation[];
+    variantLanguagesCount: number;
+    slug: string;
     noIndex?: Nullable<boolean>;
-    episodeIds: string[];
-    episodes: Video[];
+    children: Video[];
+    childrenCount: number;
+    variantLanguagesWithSlug: LanguageWithSlug[];
     variant?: Nullable<VideoVariant>;
+}
+
+export abstract class IQuery {
+    __typename?: 'IQuery';
+
+    abstract videos(where?: Nullable<VideosFilter>, offset?: Nullable<number>, limit?: Nullable<number>): Video[] | Promise<Video[]>;
+
+    abstract video(id: string, idType?: Nullable<IdType>): Nullable<Video> | Promise<Nullable<Video>>;
 }
 
 export class VideoVariantDownload {
@@ -78,18 +86,15 @@ export class VideoVariant {
     duration: number;
     language: Language;
     subtitle: Translation[];
+    subtitleCount: number;
+    slug: string;
 }
 
-export abstract class IQuery {
-    abstract videoTags(): Nullable<VideoTag[]> | Promise<Nullable<VideoTag[]>>;
-
-    abstract videoTag(id: string): Nullable<VideoTag> | Promise<Nullable<VideoTag>>;
-
-    abstract episodes(playlistId: string, idType?: Nullable<IdType>, where?: Nullable<VideosFilter>, offset?: Nullable<number>, limit?: Nullable<number>): Video[] | Promise<Video[]>;
-
-    abstract videos(where?: Nullable<VideosFilter>, offset?: Nullable<number>, limit?: Nullable<number>): Video[] | Promise<Video[]>;
-
-    abstract video(id: string, idType?: Nullable<IdType>): Video | Promise<Video>;
+export class Translation {
+    __typename?: 'Translation';
+    value: string;
+    language: Language;
+    primary: boolean;
 }
 
 export class Language {

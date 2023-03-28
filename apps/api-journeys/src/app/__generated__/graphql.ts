@@ -7,6 +7,7 @@
 
 /* tslint:disable */
 /* eslint-disable */
+
 export enum ThemeMode {
     dark = "dark",
     light = "light"
@@ -121,6 +122,12 @@ export enum TypographyAlign {
 export enum VideoBlockSource {
     internal = "internal",
     youTube = "youTube"
+}
+
+export enum VideoBlockObjectFit {
+    fill = "fill",
+    fit = "fit",
+    zoomed = "zoomed"
 }
 
 export enum MessagePlatform {
@@ -268,6 +275,8 @@ export class ImageBlockCreateInput {
     src?: Nullable<string>;
     alt: string;
     blurhash?: Nullable<string>;
+    width?: Nullable<number>;
+    height?: Nullable<number>;
     isCover?: Nullable<boolean>;
 }
 
@@ -275,6 +284,9 @@ export class ImageBlockUpdateInput {
     parentBlockId?: Nullable<string>;
     src?: Nullable<string>;
     alt?: Nullable<string>;
+    blurhash?: Nullable<string>;
+    width?: Nullable<number>;
+    height?: Nullable<number>;
 }
 
 export class RadioOptionBlockCreateInput {
@@ -370,6 +382,7 @@ export class VideoBlockCreateInput {
     posterBlockId?: Nullable<string>;
     fullsize?: Nullable<boolean>;
     isCover?: Nullable<boolean>;
+    objectFit?: Nullable<VideoBlockObjectFit>;
 }
 
 export class VideoBlockUpdateInput {
@@ -382,6 +395,7 @@ export class VideoBlockUpdateInput {
     source?: Nullable<VideoBlockSource>;
     posterBlockId?: Nullable<string>;
     fullsize?: Nullable<boolean>;
+    objectFit?: Nullable<VideoBlockObjectFit>;
 }
 
 export class ButtonClickEventCreateInput {
@@ -538,6 +552,10 @@ export class JourneyUpdateInput {
 
 export class JourneyTemplateInput {
     template?: Nullable<boolean>;
+}
+
+export class UserInviteCreateInput {
+    email: string;
 }
 
 export class VisitorUpdateInput {
@@ -783,6 +801,7 @@ export class VideoBlock implements Block {
     image?: Nullable<string>;
     duration?: Nullable<number>;
     action?: Nullable<Action>;
+    objectFit?: Nullable<VideoBlockObjectFit>;
 }
 
 export class VideoTriggerBlock implements Block {
@@ -957,6 +976,30 @@ export class PowerBiEmbed {
     expiration: string;
 }
 
+export abstract class IQuery {
+    __typename?: 'IQuery';
+
+    abstract adminJourneys(status?: Nullable<JourneyStatus[]>, template?: Nullable<boolean>): Journey[] | Promise<Journey[]>;
+
+    abstract adminJourneysReport(reportType: JourneysReportType): Nullable<PowerBiEmbed> | Promise<Nullable<PowerBiEmbed>>;
+
+    abstract adminJourney(id: string, idType?: Nullable<IdType>): Nullable<Journey> | Promise<Nullable<Journey>>;
+
+    abstract journeys(where?: Nullable<JourneysFilter>): Journey[] | Promise<Journey[]>;
+
+    abstract journey(id: string, idType?: Nullable<IdType>): Nullable<Journey> | Promise<Nullable<Journey>>;
+
+    abstract getJourneyProfile(): Nullable<JourneyProfile> | Promise<Nullable<JourneyProfile>>;
+
+    abstract userInvites(journeyId: string): Nullable<UserInvite[]> | Promise<Nullable<UserInvite[]>>;
+
+    abstract getUserRole(): Nullable<UserRole> | Promise<Nullable<UserRole>>;
+
+    abstract visitorsConnection(teamId: string, first?: Nullable<number>, after?: Nullable<string>): VisitorsConnection | Promise<VisitorsConnection>;
+
+    abstract visitor(id: string): Visitor | Promise<Visitor>;
+}
+
 export class UserJourney {
     __typename?: 'UserJourney';
     journey?: Nullable<Journey>;
@@ -965,6 +1008,24 @@ export class UserJourney {
     journeyId: string;
     role: UserJourneyRole;
     user?: Nullable<User>;
+    openedAt?: Nullable<DateTime>;
+}
+
+export class JourneyProfile {
+    __typename?: 'JourneyProfile';
+    id: string;
+    userId: string;
+    acceptedTermsAt?: Nullable<DateTime>;
+}
+
+export class UserInvite {
+    __typename?: 'UserInvite';
+    id: string;
+    journeyId: string;
+    senderId: string;
+    email: string;
+    acceptedAt?: Nullable<DateTime>;
+    removedAt?: Nullable<DateTime>;
 }
 
 export class UserRole {
@@ -1033,6 +1094,13 @@ export class VisitorsConnection {
     __typename?: 'VisitorsConnection';
     edges: VisitorEdge[];
     pageInfo: PageInfo;
+}
+
+export class Translation {
+    __typename?: 'Translation';
+    value: string;
+    language: Language;
+    primary: boolean;
 }
 
 export abstract class IMutation {
@@ -1144,6 +1212,14 @@ export abstract class IMutation {
 
     abstract journeyTemplate(id: string, input: JourneyTemplateInput): Journey | Promise<Journey>;
 
+    abstract journeyProfileCreate(): JourneyProfile | Promise<JourneyProfile>;
+
+    abstract userInviteCreate(journeyId: string, input?: Nullable<UserInviteCreateInput>): Nullable<UserInvite> | Promise<Nullable<UserInvite>>;
+
+    abstract userInviteRemove(id: string, journeyId: string): UserInvite | Promise<UserInvite>;
+
+    abstract userInviteAcceptAll(): UserInvite[] | Promise<UserInvite[]>;
+
     abstract userJourneyApprove(id: string): UserJourney | Promise<UserJourney>;
 
     abstract userJourneyPromote(id: string): UserJourney | Promise<UserJourney>;
@@ -1153,6 +1229,8 @@ export abstract class IMutation {
     abstract userJourneyRemoveAll(id: string): UserJourney[] | Promise<UserJourney[]>;
 
     abstract userJourneyRequest(journeyId: string, idType?: Nullable<IdType>): UserJourney | Promise<UserJourney>;
+
+    abstract userJourneyOpen(id: string): Nullable<UserJourney> | Promise<Nullable<UserJourney>>;
 
     abstract visitorUpdate(id: string, input: VisitorUpdateInput): Visitor | Promise<Visitor>;
 }
@@ -1164,24 +1242,6 @@ export class Video {
 
 export class Language {
     id: string;
-}
-
-export abstract class IQuery {
-    abstract adminJourneys(status?: Nullable<JourneyStatus[]>, template?: Nullable<boolean>): Journey[] | Promise<Journey[]>;
-
-    abstract adminJourneysReport(reportType: JourneysReportType): Nullable<PowerBiEmbed> | Promise<Nullable<PowerBiEmbed>>;
-
-    abstract adminJourney(id: string, idType?: Nullable<IdType>): Nullable<Journey> | Promise<Nullable<Journey>>;
-
-    abstract journeys(where?: Nullable<JourneysFilter>): Journey[] | Promise<Journey[]>;
-
-    abstract journey(id: string, idType?: Nullable<IdType>): Nullable<Journey> | Promise<Nullable<Journey>>;
-
-    abstract getUserRole(): Nullable<UserRole> | Promise<Nullable<UserRole>>;
-
-    abstract visitorsConnection(teamId: string, first?: Nullable<number>, after?: Nullable<string>): VisitorsConnection | Promise<VisitorsConnection>;
-
-    abstract visitor(id: string): Visitor | Promise<Visitor>;
 }
 
 export class User {

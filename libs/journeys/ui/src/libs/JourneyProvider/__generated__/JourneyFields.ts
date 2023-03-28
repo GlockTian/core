@@ -3,7 +3,7 @@
 // @generated
 // This file was automatically generated and should not be edited.
 
-import { JourneyStatus, ThemeName, ThemeMode, ButtonVariant, ButtonColor, ButtonSize, GridDirection, GridJustifyContent, GridAlignItems, IconName, IconSize, IconColor, TypographyAlign, TypographyColor, TypographyVariant, VideoBlockSource, UserJourneyRole } from "./../../../../__generated__/globalTypes";
+import { JourneyStatus, ThemeName, ThemeMode, ButtonVariant, ButtonColor, ButtonSize, GridDirection, GridJustifyContent, GridAlignItems, IconName, IconSize, IconColor, TypographyAlign, TypographyColor, TypographyVariant, VideoBlockSource, VideoBlockObjectFit, UserJourneyRole } from "./../../../../__generated__/globalTypes";
 
 // ====================================================
 // GraphQL fragment: JourneyFields
@@ -475,6 +475,10 @@ export interface JourneyFields_blocks_VideoBlock {
    */
   duration: number | null;
   /**
+   * how the video should display within the VideoBlock
+   */
+  objectFit: VideoBlockObjectFit | null;
+  /**
    * internal source videos: video is only populated when videoID and
    * videoVariantLanguageId are present
    */
@@ -569,6 +573,10 @@ export interface JourneyFields_userJourneys {
   __typename: "UserJourney";
   id: string;
   role: UserJourneyRole;
+  /**
+   * Date time of when the journey was first opened
+   */
+  openedAt: any | null;
   user: JourneyFields_userJourneys_user | null;
 }
 

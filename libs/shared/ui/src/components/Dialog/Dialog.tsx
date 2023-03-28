@@ -1,4 +1,4 @@
-import { ReactElement } from 'react'
+import { ReactElement, ReactChild } from 'react'
 import { styled } from '@mui/material/styles'
 import MuiDialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -13,9 +13,11 @@ interface DialogProps {
   onClose: () => void
   dialogTitle?: DialogTitle
   dialogAction?: DialogAction
+  /** Prefer `dialogAction` when child elements are buttons */
+  dialogActionChildren?: ReactChild
   divider?: boolean
   fullscreen?: boolean
-  children?: ReactElement
+  children?: ReactChild
 }
 
 interface DialogAction {
@@ -25,6 +27,7 @@ interface DialogAction {
 }
 
 interface DialogTitle {
+  icon?: ReactElement
   title: string
   closeButton?: boolean
 }
@@ -67,6 +70,7 @@ export function Dialog({
   onClose,
   dialogTitle,
   dialogAction,
+  dialogActionChildren,
   divider,
   fullscreen,
   children
@@ -81,6 +85,7 @@ export function Dialog({
     >
       {dialogTitle != null && (
         <MuiDialogTitle>
+          {dialogTitle.icon != null && dialogTitle.icon}
           {dialogTitle.title}
           {dialogTitle.closeButton != null && dialogTitle.closeButton && (
             <IconButton
@@ -93,9 +98,11 @@ export function Dialog({
           )}
         </MuiDialogTitle>
       )}
-      <DialogContent dividers={divider}>{children}</DialogContent>
-      {dialogAction != null && (
-        <DialogActions>
+      <DialogContent dividers={divider ?? dialogActionChildren != null}>
+        {children}
+      </DialogContent>
+      {dialogAction != null ? (
+        <DialogActions data-testid="dialog-action">
           {dialogAction.closeLabel != null && (
             <Button onClick={onClose}>{dialogAction.closeLabel}</Button>
           )}
@@ -103,7 +110,11 @@ export function Dialog({
             {dialogAction.submitLabel ?? 'Save'}
           </Button>
         </DialogActions>
-      )}
+      ) : dialogActionChildren != null ? (
+        <DialogActions data-testid="dialog-action">
+          {dialogActionChildren}
+        </DialogActions>
+      ) : null}
     </StyledDialog>
   )
 }

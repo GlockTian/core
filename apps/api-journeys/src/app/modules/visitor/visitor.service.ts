@@ -1,12 +1,14 @@
 import { BaseService } from '@core/nest/database/BaseService'
 import { Injectable } from '@nestjs/common'
 import { aql } from 'arangojs'
-import { DocumentCollection } from 'arangojs/collection'
 import { KeyAsId } from '@core/nest/decorators/KeyAsId'
 import { GeneratedAqlQuery } from 'arangojs/aql'
 import { forEach } from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
-import { VisitorsConnection, Visitor } from '../../__generated__/graphql'
+import {
+  VisitorsConnection,
+  MessagePlatform
+} from '../../__generated__/graphql'
 
 interface ListParams {
   after?: string | null
@@ -17,19 +19,29 @@ interface ListParams {
   sortOrder?: 'ASC' | 'DESC'
 }
 
+export interface VisitorRecord {
+  id: string
+  teamId: string
+  userId: string
+  createdAt: string
+  userAgent?: string
+  messagePlatform?: MessagePlatform
+  name?: string
+  email?: string
+}
+
 @Injectable()
-export class VisitorService extends BaseService {
-  collection: DocumentCollection = this.db.collection('visitors')
+export class VisitorService extends BaseService<VisitorRecord> {
+  collection = this.db.collection<VisitorRecord>('visitors')
 
   @KeyAsId()
   async getList({
     after,
     first,
-    filter,
-    sortOrder = 'ASC'
+    filter
   }: ListParams): Promise<VisitorsConnection> {
     const filters: GeneratedAqlQuery[] = []
-    if (after != null) filters.push(aql`FILTER item._key > ${after}`)
+    if (after != null) filters.push(aql`FILTER item.createdAt < ${after}`)
 
     forEach(filter, (value, key) => {
       if (value !== undefined) filters.push(aql`FILTER item.${key} == ${value}`)
@@ -39,9 +51,9 @@ export class VisitorService extends BaseService {
     LET $edges_plus_one = (
       FOR item IN visitors
         ${aql.join(filters)}
-        SORT item.createdAt ${sortOrder}
+        SORT item.createdAt DESC
         LIMIT ${first} + 1
-        RETURN { cursor: item._key, node: MERGE({ id: item._key }, item) }
+        RETURN { cursor: item.createdAt, node: MERGE(item, { id: item._key }) }
     )
     LET $edges = SLICE($edges_plus_one, 0, ${first})
     RETURN {
@@ -60,7 +72,7 @@ export class VisitorService extends BaseService {
   async getByUserIdAndJourneyId(
     userId: string,
     journeyId: string
-  ): Promise<Visitor> {
+  ): Promise<VisitorRecord> {
     let visitor = await (
       await this.db.query(aql`
     FOR v in visitors
@@ -82,8 +94,10 @@ export class VisitorService extends BaseService {
       `)
       ).next()
 
+      const id = uuidv4()
       visitor = await this.collection.save({
-        id: uuidv4(),
+        _key: id,
+        id,
         teamId: journey.teamId,
         userId,
         createdAt: new Date().toISOString()

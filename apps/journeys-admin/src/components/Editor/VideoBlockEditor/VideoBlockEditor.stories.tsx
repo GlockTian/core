@@ -62,6 +62,7 @@ const videoInternal: TreeBlock<VideoBlock> = {
   description: null,
   duration: null,
   image: null,
+  objectFit: null,
   video: {
     __typename: 'Video',
     id: '2_0-FallingPlates',
@@ -116,6 +117,7 @@ const videoYouTube: TreeBlock<VideoBlock> = {
   action: null,
   source: VideoBlockSource.youTube,
   video: null,
+  objectFit: null,
   posterBlockId: 'poster1.id',
   children: []
 }
@@ -134,7 +136,6 @@ const posterYouTube: TreeBlock<ImageBlock> = {
 }
 
 const onChange = async (): Promise<void> => await Promise.resolve()
-const onDelete = async (): Promise<void> => await Promise.resolve()
 
 const videoLanguages: GetVideoVariantLanguages_video = {
   __typename: 'Video',
@@ -209,7 +210,6 @@ const Template: Story = ({ ...args }) => (
         <VideoBlockEditor
           selectedBlock={args.selectedBlock}
           onChange={onChange}
-          onDelete={onDelete}
         />
       </MuiDrawer>
       <MuiDrawer
@@ -223,7 +223,6 @@ const Template: Story = ({ ...args }) => (
         <VideoBlockEditor
           selectedBlock={args.selectedBlock}
           onChange={onChange}
-          onDelete={onDelete}
         />
       </MuiDrawer>
     </ThemeProvider>
