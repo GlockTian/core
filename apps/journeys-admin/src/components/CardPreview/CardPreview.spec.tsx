@@ -260,4 +260,34 @@ describe('CardPreview', () => {
       expect(onSelect).toHaveBeenCalledWith({ view: 'action' })
     )
   })
+
+  it('should navigate to social preview when clicked', async () => {
+    const onSelect = jest.fn()
+
+    const { getAllByRole } = render(
+      <MockedProvider mocks={mocks}>
+        <JourneyProvider
+          value={{
+            journey: {
+              id: 'journeyId',
+              themeMode: ThemeMode.light,
+              themeName: ThemeName.base
+            } as unknown as Journey,
+            admin: true
+          }}
+        >
+          <CardPreview
+            steps={[]}
+            onSelect={onSelect}
+            showAddButton
+            showNavigationCards
+          />
+        </JourneyProvider>
+      </MockedProvider>
+    )
+    fireEvent.click(getAllByRole('button')[1])
+    await waitFor(() =>
+      expect(onSelect).toHaveBeenCalledWith({ view: 'social' })
+    )
+  })
 })

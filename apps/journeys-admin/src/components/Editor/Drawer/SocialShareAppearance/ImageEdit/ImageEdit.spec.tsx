@@ -44,7 +44,7 @@ describe('ImageEdit', () => {
         </JourneyProvider>
       </MockedProvider>
     )
-    expect(getAllByTestId('ImageIcon')).toHaveLength(2)
+    expect(getAllByTestId('EditIcon')).toHaveLength(1)
   })
 
   it('should display the primaryImage', () => {
